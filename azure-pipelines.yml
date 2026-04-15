@@ -1,0 +1,75 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: Release
+  solution: unit-testing-using-dotnet-test.sln
+  testProjects: PrimeService.Tests/PrimeService.Tests.csproj
+  publishDir: $(Build.ArtifactStagingDirectory)/app
+
+stages:
+- stage: BuildAndTest
+  displayName: Build and Test
+  jobs:
+  - job: Build_Test
+    displayName: Build, test, and publish artifact
+    steps:
+    - checkout: self
+      clean: true
+
+    - task: UseDotNet@2
+      displayName: Use .NET 8 SDK
+      inputs:
+        packageType: sdk
+        version: 8.0.x
+
+    - script: |
+        dotnet restore $(solution)
+      displayName: Restore dependencies
+
+    - script: |
+        dotnet build $(solution) --configuration $(buildConfiguration) --no-restore
+      displayName: Build solution
+
+    - script: |
+        dotnet test $(testProjects) \
+          --configuration $(buildConfiguration) \
+          --no-build \
+          --logger "trx;LogFileName=test-results.trx" \
+          --results-directory $(Agent.TempDirectory)/TestResults
+      displayName: Run unit tests
+
+    - task: PublishTestResults@2
+      displayName: Publish test results
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: VSTest
+        testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
+        searchFolder: '$(Agent.TempDirectory)/TestResults'
+        failTaskOnFailedTests: true
+        testRunTitle: 'Unit Tests'
+
+    - script: |
+        dotnet publish PrimeService/PrimeService.csproj --configuration $(buildConfiguration) --no-build --output $(publishDir)
+      displayName: Publish application
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish build artifact
+      inputs:
+        PathtoPublish: '$(publishDir)'
+        ArtifactName: drop
+        publishLocation: Container
+
+    - script: |
+        echo "TODO - Deployment"
+      displayName: Log deployment placeholder
