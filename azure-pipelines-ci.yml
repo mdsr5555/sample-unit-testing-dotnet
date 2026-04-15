@@ -14,15 +14,14 @@ pool:
 variables:
   buildConfiguration: Release
   solution: unit-testing-using-dotnet-test.sln
-  testProjects: PrimeService.Tests/PrimeService.Tests.csproj
-  publishDir: $(Build.ArtifactStagingDirectory)/app
+  testProject: PrimeService.Tests/PrimeService.Tests.csproj
 
 stages:
 - stage: BuildAndTest
   displayName: Build and Test
   jobs:
   - job: Build_Test
-    displayName: Build, test, and publish artifact
+    displayName: Build and run unit tests
     steps:
     - checkout: self
       clean: true
@@ -42,11 +41,7 @@ stages:
       displayName: Build solution
 
     - script: |
-        dotnet test $(testProjects) \
-          --configuration $(buildConfiguration) \
-          --no-build \
-          --logger "trx;LogFileName=test-results.trx" \
-          --results-directory $(Agent.TempDirectory)/TestResults
+        dotnet test $(testProject) --configuration $(buildConfiguration) --no-build --logger "trx;LogFileName=test-results.trx" --results-directory $(Agent.TempDirectory)/TestResults
       displayName: Run unit tests
 
     - task: PublishTestResults@2
@@ -58,17 +53,6 @@ stages:
         searchFolder: '$(Agent.TempDirectory)/TestResults'
         failTaskOnFailedTests: true
         testRunTitle: 'Unit Tests'
-
-    - script: |
-        dotnet publish PrimeService/PrimeService.csproj --configuration $(buildConfiguration) --no-build --output $(publishDir)
-      displayName: Publish application
-
-    - task: PublishBuildArtifacts@1
-      displayName: Publish build artifact
-      inputs:
-        PathtoPublish: '$(publishDir)'
-        ArtifactName: drop
-        publishLocation: Container
 
     - script: |
         echo "TODO - Deployment"
