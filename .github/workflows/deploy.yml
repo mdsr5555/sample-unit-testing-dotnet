@@ -1,0 +1,44 @@
+name: Deploy Application
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      WEBAPP_NAME: sample-unit-testing-dotnet-mdsr5555-dev
+      PUBLISH_PATH: ./publish
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish application
+        run: dotnet publish PrimeService/PrimeService.csproj --configuration Release --no-build --output ${{ env.PUBLISH_PATH }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          package: ${{ env.PUBLISH_PATH }}
