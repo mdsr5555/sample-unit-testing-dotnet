@@ -49,7 +49,7 @@ resource "azurerm_linux_web_app" "this" {
 
   app_settings = {
     "ASPNETCORE_ENVIRONMENT"                     = var.environment
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"     = azurerm_application_insights.this.connection_string
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"      = azurerm_application_insights.this.connection_string
     "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"
   }
 }
