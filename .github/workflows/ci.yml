@@ -3,17 +3,22 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - main      
+      - main
   pull_request:
     branches:
       - main
+
 permissions:
   contents: read
   checks: write
 
 jobs:
-  build-and-test:
+  build-test-lint:
     runs-on: ubuntu-latest
+
+    env:
+      BUILD_CONFIGURATION: Release
+      TEST_RESULTS_PATH: TestResults
 
     steps:
       - name: Checkout code
@@ -27,11 +32,14 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
+      - name: Lint / formatting check
+        run: dotnet format --verify-no-changes --severity error
+
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --logger "trx" --results-directory TestResults
+        run: dotnet test --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --logger "trx" --results-directory ${{ env.TEST_RESULTS_PATH }}
 
       - name: Publish Test Report
         uses: dorny/test-reporter@v1
@@ -48,5 +56,5 @@ jobs:
           name: test-results
           path: TestResults
 
-      - name: Log TODO Deployment
+      - name: TODO Deployment
         run: echo "TODO - Deployment"
