@@ -35,7 +35,7 @@ jobs:
         run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
 
       - name: Publish application
-        run: dotnet publish PrimeService/PrimeService.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --output ${{ env.PUBLISH_PATH }}
+        run: dotnet publish PrimeService.Api/PrimeService.Api.csproj --configuration Release --no-build --output ${{ env.PUBLISH_PATH }}
 
       - name: Azure Login
         uses: azure/login@v2
