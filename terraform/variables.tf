@@ -72,3 +72,8 @@ variable "private_endpoint_subnets" {
     address_prefixes = list(string)
   }))
 }
+
+variable "storage_connection_string" {
+  description = "Connection string for the storage account"
+  type        = string
+}

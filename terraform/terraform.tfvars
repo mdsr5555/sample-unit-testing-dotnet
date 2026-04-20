@@ -91,3 +91,5 @@ tags = {
   owner       = "Mudassar"
   project     = "sample-unit-testing-dotnet"
 }
+
+storage_connection_string = "your-storage-connection-string-here"

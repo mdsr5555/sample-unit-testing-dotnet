@@ -78,6 +78,22 @@ module "plan" {
 #   tags = var.tags
 # }
 
+resource "azurerm_storage_account" "storage" {
+  name                     = "stmdsr5555dev01"
+  resource_group_name      = module.rg.name
+  location                 = module.rg.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  # 🔐 Correct way to control public access
+  public_network_access_enabled = true
+
+  # Optional but recommended
+  min_tls_version = "TLS1_2"
+
+  tags = var.tags
+}
+
 module "app_service_integration_subnet" {
   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.0"
 
@@ -111,6 +127,8 @@ module "webapp" {
     ASPNETCORE_ENVIRONMENT                     = var.environment
     APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this.connection_string
     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
+
+    StorageConnectionString = azurerm_storage_account.storage.primary_connection_string
   }
 
   tags = var.tags
