@@ -1,10 +1,10 @@
 name: Deploy Application
 
 on:
-  # workflow_run:
-  #   workflows: ["Terraform Infrastructure"]
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["Terraform Infrastructure"]
+    types:
+      - completed
 
 permissions:
   contents: read
