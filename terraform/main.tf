@@ -15,7 +15,7 @@ resource "azurerm_resource_group" "rg" {
 
   lifecycle {
     prevent_destroy = true
-  }  
+  }
 }
 
 resource "azurerm_log_analytics_workspace" "this" {
