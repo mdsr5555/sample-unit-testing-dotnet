@@ -127,7 +127,7 @@ module "webapp" {
     ASPNETCORE_ENVIRONMENT                     = var.environment
     APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this.connection_string
     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
-    StorageConnectionString = azurerm_storage_account.storage.primary_connection_string
+    StorageConnectionString                    = azurerm_storage_account.storage.primary_connection_string
   }
 
   tags = var.tags
