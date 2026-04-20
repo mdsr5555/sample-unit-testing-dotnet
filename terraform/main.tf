@@ -1,17 +1,21 @@
-moved {
-  from = azurerm_resource_group.this
-  to   = azurerm_resource_group.rg
-}
+# moved {
+#   from = azurerm_resource_group.this
+#   to   = azurerm_resource_group.rg
+# }
 
-moved {
-  from = azurerm_linux_web_app.this
-  to   = azurerm_linux_web_app.webapp
-}
+# moved {
+#   from = azurerm_linux_web_app.this
+#   to   = azurerm_linux_web_app.webapp
+# }
 
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
   tags     = var.tags
+
+  lifecycle {
+    prevent_destroy = true
+  }  
 }
 
 resource "azurerm_log_analytics_workspace" "this" {
@@ -56,15 +60,15 @@ resource "azurerm_linux_web_app" "webapp" {
       dotnet_version = "8.0"
     }
 
-    dynamic "ip_restriction" {
-      for_each = var.ip_restrictions
-      content {
-        name       = ip_restriction.value.name
-        ip_address = ip_restriction.value.ip_address
-        priority   = ip_restriction.value.priority
-        action     = ip_restriction.value.action
-      }
-    }
+    # dynamic "ip_restriction" {
+    #   for_each = var.ip_restrictions
+    #   content {
+    #     name       = ip_restriction.value.name
+    #     ip_address = ip_restriction.value.ip_address
+    #     priority   = ip_restriction.value.priority
+    #     action     = ip_restriction.value.action
+    #   }
+    # }
   }
 
   app_settings = {
