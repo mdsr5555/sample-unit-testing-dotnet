@@ -52,6 +52,30 @@ vnets = {
   }
 }
 
+private_endpoint_subnets = {
+  pe-subnet-vnet01 = {
+    vnet_key         = "vnet01"
+    subnet_name      = "snet-private-endpoints-01"
+    address_prefixes = ["10.10.0.0/27"]
+  }
+
+  pe-subnet-vnet02 = {
+    vnet_key         = "vnet02"
+    subnet_name      = "snet-private-endpoints-02"
+    address_prefixes = ["10.10.1.0/27"]
+  }
+}
+
+storage_accounts = {
+  stapp001 = {
+    name = "stapp001mdsr001"
+  }
+
+  stapp002 = {
+    name = "stapp002mdsr001"
+  }
+}
+
 tags = {
   environment = "dev"
   managed_by  = "terraform"

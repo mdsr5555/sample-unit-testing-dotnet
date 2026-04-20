@@ -47,3 +47,19 @@ variable "vnets" {
   }))
   default = {}
 }
+
+variable "storage_accounts" {
+  description = "Storage accounts to create"
+  type = map(object({
+    name = string
+  }))
+}
+
+variable "private_endpoint_subnets" {
+  description = "Subnets for private endpoints"
+  type = map(object({
+    vnet_key         = string
+    subnet_name      = string
+    address_prefixes = list(string)
+  }))
+}

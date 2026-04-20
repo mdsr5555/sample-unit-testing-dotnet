@@ -109,8 +109,84 @@ module "vnet_connections" {
   vnet_id        = each.value.id
 }
 
+module "private_dns_zone_blob" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=v1.3.0"
 
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = module.rg.name
 
+  virtual_network_links = {
+    vnet01-link = {
+      virtual_network_id   = module.vnets["vnet01"].id
+      registration_enabled = false
+    }
+    vnet02-link = {
+      virtual_network_id   = module.vnets["vnet02"].id
+      registration_enabled = false
+    }
+  }
+
+  tags = var.tags
+}
+
+module "private_endpoint_subnets" {
+  for_each = var.private_endpoint_subnets
+
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.3.0"
+
+  name                 = each.value.subnet_name
+  resource_group_name  = module.rg.name
+  virtual_network_name = module.vnets[each.value.vnet_key].name
+  address_prefixes     = each.value.address_prefixes
+
+  private_endpoint_network_policies = "Disabled"
+}
+
+module "storage_accounts" {
+  for_each = var.storage_accounts
+
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/storage-account?ref=v1.3.0"
+
+  name                          = each.value.name
+  resource_group_name           = module.rg.name
+  location                      = module.rg.location
+  account_tier                  = "Standard"
+  account_replication_type      = "LRS"
+  account_kind                  = "StorageV2"
+  min_tls_version               = "TLS1_2"
+  public_network_access_enabled = false
+
+  tags = var.tags
+}
+
+module "private_endpoints" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.3.0"
+  for_each = {
+    storage1 = {
+      name                      = "pe-stapp001-blob"
+      subnet_id                 = module.private_endpoint_subnets["pe-subnet-vnet01"].id
+      target_resource_id        = module.storage_accounts["stapp001"].id
+      private_service_conn_name = "psc-stapp001-blob"
+    }
+    storage2 = {
+      name                      = "pe-stapp002-blob"
+      subnet_id                 = module.private_endpoint_subnets["pe-subnet-vnet02"].id
+      target_resource_id        = module.storage_accounts["stapp002"].id
+      private_service_conn_name = "psc-stapp002-blob"
+    }
+  }
+
+  name                            = each.value.name
+  location                        = module.rg.location
+  resource_group_name             = module.rg.name
+  subnet_id                       = each.value.subnet_id
+  private_service_connection_name = each.value.private_service_conn_name
+  private_connection_resource_id  = each.value.target_resource_id
+  subresource_names               = ["blob"]
+  private_dns_zone_group_name     = "default"
+  private_dns_zone_ids            = [module.private_dns_zone_blob.id]
+  tags                            = var.tags
+}
 
 
 

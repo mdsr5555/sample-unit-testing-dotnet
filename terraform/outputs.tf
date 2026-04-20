@@ -17,3 +17,25 @@ output "application_insights_name" {
 output "app_service_plan_name" {
   value = module.plan.name
 }
+
+output "storage_account_ids" {
+  value = {
+    for k, v in module.storage_accounts : k => v.id
+  }
+}
+
+output "storage_account_names" {
+  value = {
+    for k, v in module.storage_accounts : k => v.name
+  }
+}
+
+output "private_endpoint_ids" {
+  value = {
+    for k, v in module.private_endpoints : k => v.id
+  }
+}
+
+output "private_dns_zone_blob_name" {
+  value = module.private_dns_zone_blob.name
+}
