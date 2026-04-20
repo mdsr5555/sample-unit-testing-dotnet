@@ -92,4 +92,8 @@ tags = {
   project     = "sample-unit-testing-dotnet"
 }
 
-storage_connection_string = "your-storage-connection-string-here"
+private_endpoint_subnet = {
+  vnet_key         = "vnet01"
+  subnet_name      = "snet-storage-pe-01"
+  address_prefixes = ["10.10.0.64/27"]
+}

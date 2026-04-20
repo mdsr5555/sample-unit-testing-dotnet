@@ -36,6 +36,16 @@ output "private_endpoint_ids" {
   }
 }
 
+output "private_endpoint_subnet_ids" {
+  value = {
+    for k, v in module.private_endpoint_subnets : k => v.id
+  }
+}
+
 output "private_dns_zone_blob_name" {
   value = module.private_dns_zone_blob.name
+}
+
+output "app_service_integration_subnet_id" {
+  value = module.app_service_integration_subnet.id
 }

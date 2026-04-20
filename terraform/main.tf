@@ -86,7 +86,7 @@ resource "azurerm_storage_account" "storage" {
   account_replication_type = "LRS"
 
   # 🔐 Correct way to control public access
-  public_network_access_enabled = true
+  public_network_access_enabled = false
 
   # Optional but recommended
   min_tls_version = "TLS1_2"
@@ -127,7 +127,6 @@ module "webapp" {
     ASPNETCORE_ENVIRONMENT                     = var.environment
     APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this.connection_string
     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
-
     StorageConnectionString = azurerm_storage_account.storage.primary_connection_string
   }
 
@@ -245,8 +244,48 @@ module "private_endpoints" {
 }
 
 
+// for private network connectivity
+module "storage_private_endpoint_subnet" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.0"
 
+  name                 = var.private_endpoint_subnet.subnet_name
+  resource_group_name  = module.rg.name
+  virtual_network_name = module.vnets[var.private_endpoint_subnet.vnet_key].name
+  address_prefixes     = var.private_endpoint_subnet.address_prefixes
 
+  private_endpoint_network_policies = "Disabled"
+}
+
+module "private_dns_zone_blob" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=v1.3.0"
+
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = module.rg.name
+
+  virtual_network_links = {
+    vnet01-link = {
+      virtual_network_id   = module.vnets["vnet01"].id
+      registration_enabled = false
+    }
+  }
+
+  tags = var.tags
+}
+
+module "storage_private_endpoint" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.3.0"
+
+  name                            = "pe-stmdsr5555dev01-blob"
+  location                        = module.rg.location
+  resource_group_name             = module.rg.name
+  subnet_id                       = module.storage_private_endpoint_subnet.id
+  private_service_connection_name = "psc-stmdsr5555dev01-blob"
+  private_connection_resource_id  = azurerm_storage_account.storage.id
+  subresource_names               = ["blob"]
+  private_dns_zone_group_name     = "default"
+  private_dns_zone_ids            = [module.private_dns_zone_blob.id]
+  tags                            = var.tags
+}
 
 
 
