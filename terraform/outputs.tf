@@ -7,7 +7,7 @@ output "web_app_name" {
 }
 
 output "web_app_url" {
-  value = "https://${azurerm_linux_web_app.this.default_hostname}"
+  value = "https://${azurerm_linux_web_app.webapp.default_hostname}"
 }
 
 output "application_insights_name" {
