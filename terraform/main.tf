@@ -1,3 +1,13 @@
+moved{
+  from = azurerm_resource_group.this
+  to = azurerm_resource_group.rg
+}
+
+moved {
+  from = azurerm_linux_web_app.this
+  to = azurerm_linux_web_app.webapp
+}
+
 resource "azurerm_resource_group" "this" {
   name     = var.resource_group_name
   location = var.location
