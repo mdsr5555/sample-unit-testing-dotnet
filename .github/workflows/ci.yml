@@ -11,6 +11,7 @@ on:
 permissions:
   contents: read
   checks: write
+  security-events: write
 
 jobs:
   build-test-lint:
@@ -22,6 +23,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Run Checkov
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform/ # Change this if your TF files are elsewhere
+          framework: terraform
+          # This generates both a SARIF file (for Security Tab) and Markdown (for Summary)
+          output_format: sarif,github_failed_only
+          output_file_path: results.sarif,results.md
+          soft_fail: true # Allows the pipeline to continue even if security issues are found
+
+      - name: Publish to Security Tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() # Upload even if the scan found issues
+        with:
+          sarif_file: results.sarif
+
+      - name: Publish to Workflow Summary
+        if: always()
+        run: |
+          cat results.md >> $GITHUB_STEP_SUMMARY
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
