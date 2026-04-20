@@ -9,7 +9,7 @@ module "rg" {
 module "vnets" {
   for_each = var.vnets
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-network?ref=v1.1.0"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-network?ref=v1.1.1"
 
   name                = each.key
   location            = module.rg.location
@@ -58,6 +58,16 @@ module "webapp" {
   https_only          = true
   always_on           = false
   dotnet_version      = "8.0"
+
+  # dynamic "ip_restriction" {
+  #   for_each = var.ip_restrictions
+  #   content {
+  #     name       = ip_restriction.value.name
+  #     ip_address = ip_restriction.value.ip_address
+  #     priority   = ip_restriction.value.priority
+  #     action     = ip_restriction.value.action
+  #   }
+  # }
 
   app_settings = {
     ASPNETCORE_ENVIRONMENT                     = var.environment
