@@ -2,9 +2,17 @@ location                     = "West Europe"
 resource_group_name          = "rg-sample-unit-testing-dotnet-dev"
 app_service_plan_name        = "asp-sample-unit-testing-dotnet-dev"
 web_app_name                 = "sample-unit-testing-dotnet-mdsr5555-dev"
+
+app_service_integration_subnet = {
+  vnet_key         = "vnet01"
+  subnet_name      = "snet-appsvc-integration-01"
+  address_prefixes = ["10.10.0.32/27"]
+}
+
 log_analytics_workspace_name = "law-sample-unit-testing-dotnet-dev"
 application_insights_name    = "appi-sample-unit-testing-dotnet-dev"
 environment                  = "dev"
+
 # ip_restrictions = [
 #   {
 #     name       = "home"
@@ -19,6 +27,7 @@ environment                  = "dev"
 #     action     = "Allow"
 #   }
 # ]
+
 vnets = {
   vnet01 = {
     address_space = ["10.10.0.0/24"]

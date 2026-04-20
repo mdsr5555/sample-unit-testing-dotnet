@@ -13,6 +13,15 @@ variable "app_service_plan_name" {
   type        = string
 }
 
+variable "app_service_integration_subnet" {
+  description = "Subnet configuration for App Service VNet Integration"
+  type = object({
+    vnet_key         = string
+    subnet_name      = string
+    address_prefixes = list(string)
+  })
+}
+
 variable "web_app_name" {
   description = "Web App name"
   type        = string

@@ -48,26 +48,58 @@ module "plan" {
   tags                  = var.tags
 }
 
+# module "webapp" {
+#   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-web-app?ref=v1.0.0"
+
+#   web_app_name        = var.web_app_name
+#   location            = module.rg.location
+#   resource_group_name = module.rg.name
+#   app_service_plan_id = module.plan.id
+#   https_only          = true
+#   always_on           = false
+#   dotnet_version      = "8.0"
+
+#   # dynamic "ip_restriction" {
+#   #   for_each = var.ip_restrictions
+#   #   content {
+#   #     name       = ip_restriction.value.name
+#   #     ip_address = ip_restriction.value.ip_address
+#   #     priority   = ip_restriction.value.priority
+#   #     action     = ip_restriction.value.action
+#   #   }
+#   # }
+
+#   app_settings = {
+#     ASPNETCORE_ENVIRONMENT                     = var.environment
+#     APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this.connection_string
+#     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
+#   }
+
+#   tags = var.tags
+# }
+
+module "app_service_integration_subnet" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.3.0"
+
+  name                 = var.app_service_integration_subnet.subnet_name
+  resource_group_name  = module.rg.name
+  virtual_network_name = module.vnets[var.app_service_integration_subnet.vnet_key].name
+  address_prefixes     = var.app_service_integration_subnet.address_prefixes
+
+  private_endpoint_network_policies = "Disabled"
+}
+
 module "webapp" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-web-app?ref=v1.0.0"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-web-app?ref=v1.4.0"
 
-  web_app_name        = var.web_app_name
-  location            = module.rg.location
-  resource_group_name = module.rg.name
-  app_service_plan_id = module.plan.id
-  https_only          = true
-  always_on           = false
-  dotnet_version      = "8.0"
-
-  # dynamic "ip_restriction" {
-  #   for_each = var.ip_restrictions
-  #   content {
-  #     name       = ip_restriction.value.name
-  #     ip_address = ip_restriction.value.ip_address
-  #     priority   = ip_restriction.value.priority
-  #     action     = ip_restriction.value.action
-  #   }
-  # }
+  web_app_name              = var.web_app_name
+  location                  = module.rg.location
+  resource_group_name       = module.rg.name
+  app_service_plan_id       = module.plan.id
+  https_only                = true
+  always_on                 = false
+  dotnet_version            = "8.0"
+  virtual_network_subnet_id = module.app_service_integration_subnet.id
 
   app_settings = {
     ASPNETCORE_ENVIRONMENT                     = var.environment
