@@ -1,7 +1,7 @@
-location                     = "West Europe"
-resource_group_name          = "rg-sample-unit-testing-dotnet-dev"
-app_service_plan_name        = "asp-sample-unit-testing-dotnet-dev"
-web_app_name                 = "sample-unit-testing-dotnet-mdsr5555-dev"
+location              = "West Europe"
+resource_group_name   = "rg-sample-unit-testing-dotnet-dev"
+app_service_plan_name = "asp-sample-unit-testing-dotnet-dev"
+web_app_name          = "sample-unit-testing-dotnet-mdsr5555-dev"
 
 app_service_integration_subnet = {
   vnet_key         = "vnet01"
