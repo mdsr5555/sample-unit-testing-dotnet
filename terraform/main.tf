@@ -256,22 +256,6 @@ module "storage_private_endpoint_subnet" {
   private_endpoint_network_policies = "Disabled"
 }
 
-module "private_dns_zone_blob" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=v1.3.0"
-
-  name                = "privatelink.blob.core.windows.net"
-  resource_group_name = module.rg.name
-
-  virtual_network_links = {
-    vnet01-link = {
-      virtual_network_id   = module.vnets["vnet01"].id
-      registration_enabled = false
-    }
-  }
-
-  tags = var.tags
-}
-
 module "storage_private_endpoint" {
   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.3.0"
 
