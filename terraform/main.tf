@@ -79,7 +79,7 @@ module "plan" {
 # }
 
 module "app_service_integration_subnet" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.3.0"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.0"
 
   name                 = var.app_service_integration_subnet.subnet_name
   resource_group_name  = module.rg.name
@@ -87,6 +87,12 @@ module "app_service_integration_subnet" {
   address_prefixes     = var.app_service_integration_subnet.address_prefixes
 
   private_endpoint_network_policies = "Disabled"
+
+  delegation_name         = "appsvc-delegation"
+  service_delegation_name = "Microsoft.Web/serverFarms"
+  service_delegation_actions = [
+    "Microsoft.Network/virtualNetworks/subnets/action"
+  ]
 }
 
 module "webapp" {
