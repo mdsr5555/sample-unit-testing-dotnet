@@ -78,6 +78,47 @@ module "webapp" {
   tags = var.tags
 }
 
+module "vwan" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-wan?ref=v1.2.0"
+
+  name                = "vwan-main"
+  location            = module.rg.location
+  resource_group_name = module.rg.name
+  tags                = var.tags
+}
+
+module "hub" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-hub?ref=v1.2.0"
+
+  name                = "vhub-main"
+  location            = module.rg.location
+  resource_group_name = module.rg.name
+  virtual_wan_id      = module.vwan.id
+
+  address_prefix = "10.100.0.0/24" # hub network
+  tags           = var.tags
+}
+
+module "vnet_connections" {
+  for_each = module.vnets
+
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/vnet-connection?ref=v1.2.0"
+
+  name           = "conn-${each.key}"
+  virtual_hub_id = module.hub.id
+  vnet_id        = each.value.id
+}
+
+
+
+
+
+
+
+
+
+
+
 # # moved {
 # #   from = azurerm_resource_group.this
 # #   to   = azurerm_resource_group.rg
