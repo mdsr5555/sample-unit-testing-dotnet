@@ -6,6 +6,19 @@ module "rg" {
   tags     = var.tags
 }
 
+module "vnets" {
+  for_each = var.vnets
+
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-network?ref=v1.1.0"
+
+  name                = each.key
+  location            = module.rg.location
+  resource_group_name = module.rg.name
+  address_space       = each.value.address_space
+  dns_servers         = each.value.dns_servers
+  tags                = var.tags
+}
+
 resource "azurerm_log_analytics_workspace" "this" {
   name                = var.log_analytics_workspace_name
   location            = module.rg.location

@@ -19,6 +19,38 @@ environment                  = "dev"
 #     action     = "Allow"
 #   }
 # ]
+vnets = {
+  vnet01 = {
+    address_space = ["10.10.0.0/24"]
+  }
+  vnet02 = {
+    address_space = ["10.10.1.0/24"]
+  }
+  vnet03 = {
+    address_space = ["10.10.2.0/24"]
+  }
+  vnet04 = {
+    address_space = ["10.10.3.0/24"]
+  }
+  vnet05 = {
+    address_space = ["10.10.4.0/24"]
+  }
+  vnet06 = {
+    address_space = ["10.10.5.0/24"]
+  }
+  vnet07 = {
+    address_space = ["10.10.6.0/24"]
+  }
+  vnet08 = {
+    address_space = ["10.10.7.0/24"]
+  }
+  vnet09 = {
+    address_space = ["10.10.8.0/24"]
+  }
+  vnet10 = {
+    address_space = ["10.10.9.0/24"]
+  }
+}
 
 tags = {
   environment = "dev"

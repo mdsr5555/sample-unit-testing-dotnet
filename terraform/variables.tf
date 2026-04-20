@@ -38,3 +38,12 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "vnets" {
+  description = "Map of virtual networks to create"
+  type = map(object({
+    address_space = list(string)
+    dns_servers   = optional(list(string), [])
+  }))
+  default = {}
+}
