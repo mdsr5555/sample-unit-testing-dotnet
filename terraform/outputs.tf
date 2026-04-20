@@ -1,15 +1,19 @@
 output "resource_group_name" {
-  value = azurerm_resource_group.rg.name
+  value = module.rg.name
 }
 
 output "web_app_name" {
-  value = azurerm_linux_web_app.webapp.name
+  value = module.webapp.name
 }
 
 output "web_app_url" {
-  value = "https://${azurerm_linux_web_app.webapp.default_hostname}"
+  value = "https://${module.webapp.default_hostname}"
 }
 
 output "application_insights_name" {
   value = azurerm_application_insights.this.name
+}
+
+output "app_service_plan_name" {
+  value = module.plan.name
 }
