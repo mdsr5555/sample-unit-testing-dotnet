@@ -48,3 +48,18 @@ variable "tags" {
     managed_by  = "terraform"
   }
 }
+
+variable "ip_restrictions" {
+  description = "IP restrcitions of the web app"
+  type = list(
+    object(
+      {
+        name       = string
+        ip_address = string
+        priority   = number
+        action     = string
+      }
+    )
+  )
+  default = []
+}

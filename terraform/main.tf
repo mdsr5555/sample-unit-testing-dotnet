@@ -55,6 +55,16 @@ resource "azurerm_linux_web_app" "webapp" {
     application_stack {
       dotnet_version = "8.0"
     }
+
+    dynamic "ip_restriction" {
+      for_each = var.ip_restrictions
+      content {
+        name       = ip_restriction.value.name
+        ip_address = ip_restriction.value.ip_address
+        priority   = ip_restriction.value.priority
+        action     = ip_restriction.value.action
+      }
+    }
   }
 
   app_settings = {
