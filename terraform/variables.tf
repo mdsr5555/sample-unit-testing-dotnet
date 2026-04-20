@@ -73,11 +73,6 @@ variable "private_endpoint_subnets" {
   }))
 }
 
-variable "storage_connection_string" {
-  description = "Connection string for the storage account"
-  type        = string
-}
-
 variable "private_endpoint_subnet" {
   description = "Subnet configuration for storage private endpoint"
   type = object({
