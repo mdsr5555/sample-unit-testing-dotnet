@@ -37,19 +37,46 @@ resource "azurerm_application_insights" "this" {
   tags                = var.tags
 }
 
-module "frontdoor" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/frontdoor?ref=v1.5.1"
+# module "frontdoor" {
+#   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/frontdoor?ref=v1.5.1"
 
-  name                = "afd-sample-dev"
-  resource_group_name = module.rg.name
-  tags                = var.tags
+#   name                = "afd-sample-dev"
+#   resource_group_name = module.rg.name
+#   tags                = var.tags
 
-  endpoint_name     = "afd-endpoint-sample-dev"
-  origin_group_name = "og-app"
-  origin_name       = "origin-app"
-  route_name        = "route-app"
+#   endpoint_name     = "afd-endpoint-sample-dev"
+#   origin_group_name = "og-app"
+#   origin_name       = "origin-app"
+#   route_name        = "route-app"
 
-  origin_host_name = module.webapp.default_hostname
+#   origin_host_name = module.webapp.default_hostname
+# }
+
+module "application_gateway_subnet" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.0"
+
+  name                 = var.application_gateway_subnet.subnet_name
+  resource_group_name  = module.rg.name
+  virtual_network_name = module.vnets[var.application_gateway_subnet.vnet_key].name
+  address_prefixes     = var.application_gateway_subnet.address_prefixes
+
+  private_endpoint_network_policies = "Disabled"
+}
+
+module "application_gateway" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.5.1"
+
+  name                     = var.application_gateway_name
+  public_ip_name           = var.application_gateway_public_ip_name
+  resource_group_name      = module.rg.name
+  location                 = module.rg.location
+  subnet_id                = module.application_gateway_subnet.id
+  backend_fqdn             = module.webapp.default_hostname
+  health_probe_path        = "/health"
+  ssl_certificate_name     = var.application_gateway_ssl_certificate_name
+  ssl_certificate_data     = var.application_gateway_ssl_certificate_data
+  ssl_certificate_password = var.application_gateway_ssl_certificate_password
+  tags                     = var.tags
 }
 
 module "plan" {

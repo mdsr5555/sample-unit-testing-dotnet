@@ -11,7 +11,11 @@ permissions:
 
 jobs:
   terraform:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_application_gateway_ssl_certificate_data: ${{ secrets.APPGW_CERT_DATA }}
+      TF_VAR_application_gateway_ssl_certificate_password: ${{ secrets.APPGW_CERT_PASSWORD }}
     defaults:
       run:
         working-directory: terraform

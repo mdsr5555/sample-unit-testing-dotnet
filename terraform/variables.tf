@@ -82,29 +82,39 @@ variable "private_endpoint_subnet" {
   })
 }
 
-// variables needed for adding AFD
+// variables for aplication gateway
+variable "application_gateway_subnet" {
+  description = "Subnet configuration for Application Gateway"
+  type = object({
+    vnet_key         = string
+    subnet_name      = string
+    address_prefixes = list(string)
+  })
+}
 
-variable "frontdoor_profile_name" {
-  description = "Azure Front Door profile name"
+variable "application_gateway_name" {
+  description = "Application Gateway name"
   type        = string
 }
 
-variable "frontdoor_endpoint_name" {
-  description = "Azure Front Door endpoint name"
+variable "application_gateway_public_ip_name" {
+  description = "Public IP name for Application Gateway"
   type        = string
 }
 
-variable "frontdoor_origin_group_name" {
-  description = "Azure Front Door origin group name"
+variable "application_gateway_ssl_certificate_name" {
+  description = "SSL certificate name for Application Gateway"
   type        = string
 }
 
-variable "frontdoor_origin_name" {
-  description = "Azure Front Door origin name"
+variable "application_gateway_ssl_certificate_data" {
+  description = "Base64-encoded PFX certificate data"
   type        = string
+  sensitive   = true
 }
 
-variable "frontdoor_route_name" {
-  description = "Azure Front Door route name"
+variable "application_gateway_ssl_certificate_password" {
+  description = "Password for the PFX certificate"
   type        = string
+  sensitive   = true
 }

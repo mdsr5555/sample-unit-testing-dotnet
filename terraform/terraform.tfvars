@@ -98,10 +98,13 @@ private_endpoint_subnet = {
   address_prefixes = ["10.10.0.64/27"]
 }
 
+// variables for application gateway
+application_gateway_subnet = {
+  vnet_key         = "vnet01"
+  subnet_name      = "snet-appgw-01"
+  address_prefixes = ["10.10.0.96/27"]
+}
 
-// variables needed for adding AFD
-frontdoor_profile_name      = "afd-sample-unit-testing-dotnet-dev"
-frontdoor_endpoint_name     = "afd-endpoint-sample-unit-testing-dotnet-dev"
-frontdoor_origin_group_name = "og-appservice"
-frontdoor_origin_name       = "origin-appservice"
-frontdoor_route_name        = "route-app"
+application_gateway_name                 = "agw-sample-unit-testing-dotnet-dev"
+application_gateway_public_ip_name       = "pip-agw-sample-unit-testing-dotnet-dev"
+application_gateway_ssl_certificate_name = "appgw-cert"

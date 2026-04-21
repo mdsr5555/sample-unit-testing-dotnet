@@ -50,6 +50,14 @@ output "app_service_integration_subnet_id" {
   value = module.app_service_integration_subnet.id
 }
 
-output "frontdoor_url" {
-  value = module.frontdoor.url
+# output "frontdoor_url" {
+#   value = module.frontdoor.url
+# }
+
+output "application_gateway_id" {
+  value = module.application_gateway.id
+}
+
+output "application_gateway_public_ip" {
+  value = module.application_gateway.public_ip_address
 }
