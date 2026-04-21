@@ -64,7 +64,7 @@ module "application_gateway_subnet" {
 }
 
 module "application_gateway" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.5.2"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.5.3"
 
   name                     = var.application_gateway_name
   public_ip_name           = var.application_gateway_public_ip_name
