@@ -1,7 +1,8 @@
 name: Terraform Infrastructure
 
 on:
-  workflows: ["CI Pipeline"]
+  workflow_run:
+    workflows: ["CI Pipeline"]
     types:
       - completed
 
