@@ -1,13 +1,9 @@
 name: Terraform Infrastructure
 
 on:
-  push:
-    branches:
-    - main        
-    paths:
-      - 'terraform/**'
-      - '.github/workflows/infra.yml'
-  workflow_dispatch:
+  workflows: ["CI Pipeline"]
+    types:
+      - completed
 
 permissions:
   contents: read
