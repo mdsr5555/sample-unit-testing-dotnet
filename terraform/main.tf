@@ -91,6 +91,23 @@ module "application_gateway" {
   tags = var.tags
 }
 
+module "application_gateway_diagnostics" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/diagnostic-setting?ref=v1.5.8"
+
+  name                       = "diag-application-gateway"
+  target_resource_id         = module.application_gateway.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+
+  log_categories = [
+    "ApplicationGatewayAccessLog",
+    "ApplicationGatewayFirewallLog"
+  ]
+
+  metric_categories = [
+    "AllMetrics"
+  ]
+}
+
 module "plan" {
   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/app-service-plan?ref=v1.0.0"
 
