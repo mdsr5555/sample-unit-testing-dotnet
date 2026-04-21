@@ -64,7 +64,7 @@ module "application_gateway_subnet" {
 }
 
 module "application_gateway" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.5.6"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.5.7"
 
   name                     = var.application_gateway_name
   public_ip_name           = var.application_gateway_public_ip_name
@@ -76,7 +76,19 @@ module "application_gateway" {
   ssl_certificate_name     = var.application_gateway_ssl_certificate_name
   ssl_certificate_data     = var.application_gateway_ssl_certificate_data
   ssl_certificate_password = var.application_gateway_ssl_certificate_password
-  tags                     = var.tags
+
+  sku_name = "WAF_v2"
+  sku_tier = "WAF_v2"
+  capacity = 1
+
+  waf_enabled                  = true
+  waf_firewall_mode            = "Detection"
+  waf_rule_set_type            = "OWASP"
+  waf_rule_set_version         = "3.2"
+  waf_file_upload_limit_mb     = 100
+  waf_max_request_body_size_kb = 128
+
+  tags = var.tags
 }
 
 module "plan" {
