@@ -37,6 +37,21 @@ resource "azurerm_application_insights" "this" {
   tags                = var.tags
 }
 
+module "frontdoor" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/frontdoor?ref=v1.5.1"
+
+  name                = "afd-sample-dev"
+  resource_group_name = module.rg.name
+  tags                = var.tags
+
+  endpoint_name     = "afd-endpoint-sample-dev"
+  origin_group_name = "og-app"
+  origin_name       = "origin-app"
+  route_name        = "route-app"
+
+  origin_host_name = module.webapp.default_hostname
+}
+
 module "plan" {
   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/app-service-plan?ref=v1.0.0"
 

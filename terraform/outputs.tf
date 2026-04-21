@@ -49,3 +49,7 @@ output "private_dns_zone_blob_name" {
 output "app_service_integration_subnet_id" {
   value = module.app_service_integration_subnet.id
 }
+
+output "frontdoor_url" {
+  value = module.frontdoor.url
+}

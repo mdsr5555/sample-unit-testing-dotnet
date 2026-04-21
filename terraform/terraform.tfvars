@@ -97,3 +97,11 @@ private_endpoint_subnet = {
   subnet_name      = "snet-storage-pe-01"
   address_prefixes = ["10.10.0.64/27"]
 }
+
+
+// variables needed for adding AFD
+frontdoor_profile_name      = "afd-sample-unit-testing-dotnet-dev"
+frontdoor_endpoint_name     = "afd-endpoint-sample-unit-testing-dotnet-dev"
+frontdoor_origin_group_name = "og-appservice"
+frontdoor_origin_name       = "origin-appservice"
+frontdoor_route_name        = "route-app"

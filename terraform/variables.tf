@@ -81,3 +81,30 @@ variable "private_endpoint_subnet" {
     address_prefixes = list(string)
   })
 }
+
+// variables needed for adding AFD
+
+variable "frontdoor_profile_name" {
+  description = "Azure Front Door profile name"
+  type        = string
+}
+
+variable "frontdoor_endpoint_name" {
+  description = "Azure Front Door endpoint name"
+  type        = string
+}
+
+variable "frontdoor_origin_group_name" {
+  description = "Azure Front Door origin group name"
+  type        = string
+}
+
+variable "frontdoor_origin_name" {
+  description = "Azure Front Door origin name"
+  type        = string
+}
+
+variable "frontdoor_route_name" {
+  description = "Azure Front Door route name"
+  type        = string
+}
