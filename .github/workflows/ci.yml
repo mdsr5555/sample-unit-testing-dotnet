@@ -9,15 +9,19 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "0 8 * * *" # 9 AM UK during BST
 
 permissions:
   contents: read
   checks: write
   security-events: write
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  build-test-package:
     runs-on: ubuntu-latest
 
     env:
@@ -26,6 +30,7 @@ jobs:
       API_PROJECT: PrimeService.Api/PrimeService.Api.csproj
       TEST_PROJECT: PrimeService.Tests/PrimeService.Tests.csproj
       PUBLISH_DIR: publish
+      PACKAGE_FILE: app-build-${{ github.sha }}.zip
 
     steps:
       - name: Checkout code
@@ -39,18 +44,18 @@ jobs:
           framework: terraform
           output_format: sarif,github_failed_only
           output_file_path: results.sarif,results.md
-          soft_fail: true
+          soft_fail: false
 
-      - name: Publish to Security Tab
+      - name: Publish Checkov results to Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
 
-      - name: Publish to Workflow Summary
+      - name: Publish Checkov results to workflow summary
         if: always()
         run: |
-          cat results.md >> $GITHUB_STEP_SUMMARY
+          cat results.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -82,16 +87,23 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ github.sha }}
           path: "**/TestResults/*.trx"
           if-no-files-found: error
+          retention-days: 14
 
       - name: Publish application
         run: dotnet publish ${{ env.API_PROJECT }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --output ${{ env.PUBLISH_DIR }}
 
+      - name: Create deployment package
+        run: |
+          cd ${{ env.PUBLISH_DIR }}
+          zip -r "../${{ env.PACKAGE_FILE }}" .
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-build
-          path: ${{ env.PUBLISH_DIR }}/
+          name: app-build-${{ github.sha }}
+          path: ${{ env.PACKAGE_FILE }}
           if-no-files-found: error
+          retention-days: 14

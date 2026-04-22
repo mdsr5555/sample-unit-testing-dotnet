@@ -3,7 +3,7 @@ name: Terraform Destroy
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"  # 1 AM UK (BST)
+    - cron: "0 1 * * *"  # 2 AM UK (BST)
 
 permissions:
   contents: read
