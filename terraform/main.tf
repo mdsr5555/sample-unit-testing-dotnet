@@ -81,7 +81,7 @@ module "application_gateway" {
   sku_tier = "WAF_v2"
   capacity = 1
 
-  waf_enabled                  = false
+  waf_enabled                  = true
   waf_firewall_mode            = "Detection"
   waf_rule_set_type            = "OWASP"
   waf_rule_set_version         = "3.2"
@@ -119,36 +119,6 @@ module "plan" {
   sku_name              = "B1"
   tags                  = var.tags
 }
-
-# module "webapp" {
-#   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-web-app?ref=v1.0.0"
-
-#   web_app_name        = var.web_app_name
-#   location            = module.rg.location
-#   resource_group_name = module.rg.name
-#   app_service_plan_id = module.plan.id
-#   https_only          = true
-#   always_on           = false
-#   dotnet_version      = "8.0"
-
-#   # dynamic "ip_restriction" {
-#   #   for_each = var.ip_restrictions
-#   #   content {
-#   #     name       = ip_restriction.value.name
-#   #     ip_address = ip_restriction.value.ip_address
-#   #     priority   = ip_restriction.value.priority
-#   #     action     = ip_restriction.value.action
-#   #   }
-#   # }
-
-#   app_settings = {
-#     ASPNETCORE_ENVIRONMENT                     = var.environment
-#     APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this.connection_string
-#     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
-#   }
-
-#   tags = var.tags
-# }
 
 module "app_service_integration_subnet" {
   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.8"
@@ -268,56 +238,14 @@ module "storage" {
   tags = var.tags
 }
 
-# module "private_endpoints" {
-#   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.3.0"
-#   for_each = {
-#     storage1 = {
-#       name                      = "pe-stapp001-blob"
-#       subnet_id                 = module.private_endpoint_subnets["pe-subnet-vnet01"].id
-#       target_resource_id        = module.storage_accounts["stapp001"].id
-#       private_service_conn_name = "psc-stapp001-blob"
-#     }
-#     storage2 = {
-#       name                      = "pe-stapp002-blob"
-#       subnet_id                 = module.private_endpoint_subnets["pe-subnet-vnet02"].id
-#       target_resource_id        = module.storage_accounts["stapp002"].id
-#       private_service_conn_name = "psc-stapp002-blob"
-#     }
-#   }
-
-#   name                            = each.value.name
-#   location                        = module.rg.location
-#   resource_group_name             = module.rg.name
-#   subnet_id                       = each.value.subnet_id
-#   private_service_connection_name = each.value.private_service_conn_name
-#   private_connection_resource_id  = each.value.target_resource_id
-#   subresource_names               = ["blob"]
-#   private_dns_zone_group_name     = "default"
-#   private_dns_zone_ids            = [module.private_dns_zone_blob.id]
-#   tags                            = var.tags
-# }
-
-
-# // for private network connectivity
-# module "storage_private_endpoint_subnet" {
-#   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.0"
-
-#   name                 = var.private_endpoint_subnet.subnet_name
-#   resource_group_name  = module.rg.name
-#   virtual_network_name = module.vnets[var.private_endpoint_subnet.vnet_key].name
-#   address_prefixes     = var.private_endpoint_subnet.address_prefixes
-
-#   private_endpoint_network_policies = "Disabled"
-# }
-
 module "storage_private_endpoint" {
   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.5.9"
 
-  name                            = "pe-stmdsr5555dev01-blob"
+  name                            = "pe-${local.storage_account_name}-blob"
   location                        = module.rg.location
   resource_group_name             = module.rg.name
   subnet_id                       = module.private_endpoint_subnets["pe-subnet-vnet01"].id
-  private_service_connection_name = "psc-stmdsr5555dev01-blob"
+  private_service_connection_name = "psc-${local.storage_account_name}-blob"
   private_connection_resource_id  = module.storage.id
   subresource_names               = ["blob"]
   private_dns_zone_group_name     = "default"
