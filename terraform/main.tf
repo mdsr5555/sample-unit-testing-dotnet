@@ -183,7 +183,7 @@ module "webapp" {
     ASPNETCORE_ENVIRONMENT                     = var.environment
     APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this.connection_string
     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
-    StorageConnectionString                    = azurerm_storage_account.storage.primary_connection_string
+    StorageConnectionString                    = module.storage.primary_connection_string
   }
 
   tags = var.tags
@@ -243,7 +243,7 @@ module "private_dns_zone_blob" {
 module "private_endpoint_subnets" {
   for_each = var.private_endpoint_subnets
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.8"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.9"
 
   name                 = each.value.subnet_name
   resource_group_name  = module.rg.name
@@ -253,69 +253,72 @@ module "private_endpoint_subnets" {
   private_endpoint_network_policies = "Disabled"
 }
 
-resource "azurerm_storage_account" "storage" {
+module "storage" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/storage-account?ref=v1.5.9"
+
   name                          = local.storage_account_name
   resource_group_name           = module.rg.name
   location                      = module.rg.location
   account_tier                  = "Standard"
   account_replication_type      = "LRS"
-  public_network_access_enabled = false
+  account_kind                  = "StorageV2"
   min_tls_version               = "TLS1_2"
+  public_network_access_enabled = false
 
   tags = var.tags
 }
 
-module "private_endpoints" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.3.0"
-  for_each = {
-    storage1 = {
-      name                      = "pe-stapp001-blob"
-      subnet_id                 = module.private_endpoint_subnets["pe-subnet-vnet01"].id
-      target_resource_id        = module.storage_accounts["stapp001"].id
-      private_service_conn_name = "psc-stapp001-blob"
-    }
-    storage2 = {
-      name                      = "pe-stapp002-blob"
-      subnet_id                 = module.private_endpoint_subnets["pe-subnet-vnet02"].id
-      target_resource_id        = module.storage_accounts["stapp002"].id
-      private_service_conn_name = "psc-stapp002-blob"
-    }
-  }
+# module "private_endpoints" {
+#   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.3.0"
+#   for_each = {
+#     storage1 = {
+#       name                      = "pe-stapp001-blob"
+#       subnet_id                 = module.private_endpoint_subnets["pe-subnet-vnet01"].id
+#       target_resource_id        = module.storage_accounts["stapp001"].id
+#       private_service_conn_name = "psc-stapp001-blob"
+#     }
+#     storage2 = {
+#       name                      = "pe-stapp002-blob"
+#       subnet_id                 = module.private_endpoint_subnets["pe-subnet-vnet02"].id
+#       target_resource_id        = module.storage_accounts["stapp002"].id
+#       private_service_conn_name = "psc-stapp002-blob"
+#     }
+#   }
 
-  name                            = each.value.name
-  location                        = module.rg.location
-  resource_group_name             = module.rg.name
-  subnet_id                       = each.value.subnet_id
-  private_service_connection_name = each.value.private_service_conn_name
-  private_connection_resource_id  = each.value.target_resource_id
-  subresource_names               = ["blob"]
-  private_dns_zone_group_name     = "default"
-  private_dns_zone_ids            = [module.private_dns_zone_blob.id]
-  tags                            = var.tags
-}
+#   name                            = each.value.name
+#   location                        = module.rg.location
+#   resource_group_name             = module.rg.name
+#   subnet_id                       = each.value.subnet_id
+#   private_service_connection_name = each.value.private_service_conn_name
+#   private_connection_resource_id  = each.value.target_resource_id
+#   subresource_names               = ["blob"]
+#   private_dns_zone_group_name     = "default"
+#   private_dns_zone_ids            = [module.private_dns_zone_blob.id]
+#   tags                            = var.tags
+# }
 
 
-// for private network connectivity
-module "storage_private_endpoint_subnet" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.0"
+# // for private network connectivity
+# module "storage_private_endpoint_subnet" {
+#   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.0"
 
-  name                 = var.private_endpoint_subnet.subnet_name
-  resource_group_name  = module.rg.name
-  virtual_network_name = module.vnets[var.private_endpoint_subnet.vnet_key].name
-  address_prefixes     = var.private_endpoint_subnet.address_prefixes
+#   name                 = var.private_endpoint_subnet.subnet_name
+#   resource_group_name  = module.rg.name
+#   virtual_network_name = module.vnets[var.private_endpoint_subnet.vnet_key].name
+#   address_prefixes     = var.private_endpoint_subnet.address_prefixes
 
-  private_endpoint_network_policies = "Disabled"
-}
+#   private_endpoint_network_policies = "Disabled"
+# }
 
 module "storage_private_endpoint" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.3.0"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.5.9"
 
   name                            = "pe-stmdsr5555dev01-blob"
   location                        = module.rg.location
   resource_group_name             = module.rg.name
-  subnet_id                       = module.storage_private_endpoint_subnet.id
+  subnet_id                       = module.private_endpoint_subnets["pe-subnet-vnet01"].id
   private_service_connection_name = "psc-stmdsr5555dev01-blob"
-  private_connection_resource_id  = azurerm_storage_account.storage.id
+  private_connection_resource_id  = module.storage.id
   subresource_names               = ["blob"]
   private_dns_zone_group_name     = "default"
   private_dns_zone_ids            = [module.private_dns_zone_blob.id]
