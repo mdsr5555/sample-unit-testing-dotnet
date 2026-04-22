@@ -2,18 +2,14 @@ locals {
   region_names = {
     for region_key, region in var.regions :
     region_key => {
-      rg_name   = "rg-${var.project_name}-${var.environment}-${region.short}"
-      law_name  = "law-${var.project_name}-${var.environment}-${region.short}"
-      appi_name = "appi-${var.project_name}-${var.environment}-${region.short}"
-      asp_name  = "asp-${var.project_name}-${var.environment}-${region.short}"
-      web_name  = "${var.project_name}-${var.unique_suffix}-${var.environment}-${region.short}"
-      agw_name  = "agw-${var.project_name}-${var.environment}-${region.short}"
-      pip_name  = "pip-agw-${var.project_name}-${var.environment}-${region.short}"
-      storage_name = substr(
-        lower(replace("st${var.project_name}${var.environment}${region.short}${var.unique_suffix}", "-", "")),
-        0,
-        24
-      )
+      rg_name      = "rg-${var.project_name}-${var.environment}-${region.short}"
+      law_name     = "law-${var.project_name}-${var.environment}-${region.short}"
+      appi_name    = "appi-${var.project_name}-${var.environment}-${region.short}"
+      asp_name     = "asp-${var.project_name}-${var.environment}-${region.short}"
+      web_name     = "${var.project_name}-${var.unique_suffix}-${var.environment}-${region.short}"
+      agw_name     = "agw-${var.project_name}-${var.environment}-${region.short}"
+      pip_name     = "pip-agw-${var.project_name}-${var.environment}-${region.short}"
+      storage_name = substr(lower("st${region.short}${var.environment}${var.unique_suffix}"), 0, 24)
     }
   }
 
