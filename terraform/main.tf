@@ -81,7 +81,7 @@ module "application_gateway" {
   sku_tier = "WAF_v2"
   capacity = 1
 
-  waf_enabled                  = true
+  waf_enabled                  = false
   waf_firewall_mode            = "Detection"
   waf_rule_set_type            = "OWASP"
   waf_rule_set_version         = "3.2"
@@ -100,7 +100,8 @@ module "application_gateway_diagnostics" {
 
   log_categories = [
     "ApplicationGatewayAccessLog",
-    "ApplicationGatewayFirewallLog"
+    "ApplicationGatewayFirewallLog",
+    "ApplicationGatewayPerformanceLog"
   ]
 
   metric_categories = [
