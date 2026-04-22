@@ -9,7 +9,7 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * *"  # 9 AM UK (BST)
+    - cron: "0 8 * * *"
 
 permissions:
   contents: read
@@ -22,6 +22,10 @@ jobs:
 
     env:
       BUILD_CONFIGURATION: Release
+      SOLUTION_FILE: unit-testing-using-dotnet-test.sln
+      API_PROJECT: PrimeService.Api/PrimeService.Api.csproj
+      TEST_PROJECT: PrimeService.Tests/PrimeService.Tests.csproj
+      PUBLISH_DIR: publish
 
     steps:
       - name: Checkout code
@@ -31,16 +35,15 @@ jobs:
         id: checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: terraform/ # Change this if your TF files are elsewhere
+          directory: terraform/
           framework: terraform
-          # This generates both a SARIF file (for Security Tab) and Markdown (for Summary)
           output_format: sarif,github_failed_only
           output_file_path: results.sarif,results.md
-          soft_fail: true # Allows the pipeline to continue even if security issues are found
+          soft_fail: true
 
       - name: Publish to Security Tab
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
-        if: always() # Upload even if the scan found issues
         with:
           sarif_file: results.sarif
 
@@ -52,27 +55,26 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "8.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore unit-testing-using-dotnet-test.sln
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
 
       - name: Lint / formatting check
-        run: dotnet format unit-testing-using-dotnet-test.sln --verify-no-changes
-        continue-on-error: true
+        run: dotnet format ${{ env.SOLUTION_FILE }} --verify-no-changes
 
       - name: Build
-        run: dotnet build unit-testing-using-dotnet-test.sln --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+        run: dotnet build ${{ env.SOLUTION_FILE }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
 
       - name: Run unit tests
-        run: dotnet test PrimeService.Tests/PrimeService.Tests.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --logger "trx" --results-directory TestResults
+        run: dotnet test ${{ env.TEST_PROJECT }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --logger "trx" --results-directory TestResults
 
       - name: Publish test report
         if: always()
         uses: dorny/test-reporter@v1
         with:
           name: Unit Tests
-          path: '**/TestResults/*.trx'
+          path: "**/TestResults/*.trx"
           reporter: dotnet-trx
           fail-on-empty: true
 
@@ -81,8 +83,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: '**/TestResults/*.trx'
+          path: "**/TestResults/*.trx"
           if-no-files-found: error
 
-      - name: TODO Deployment
-        run: echo "TODO - Deployment"
+      - name: Publish application
+        run: dotnet publish ${{ env.API_PROJECT }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --output ${{ env.PUBLISH_DIR }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-build
+          path: ${{ env.PUBLISH_DIR }}/
+          if-no-files-found: error

@@ -5,37 +5,108 @@ on:
     workflows: ["Terraform Infrastructure"]
     types:
       - completed
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: "Commit SHA to deploy. Leave empty to use current SHA for manual runs."
+        required: false
+        type: string
 
 permissions:
   contents: read
+  actions: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
+    environment: dev
 
-    env:
-      WEBAPP_NAME: sample-unit-testing-dotnet-mdsr5555-dev
-      PUBLISH_PATH: ./publish
-      BUILD_CONFIGURATION: Release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - region: primary
+            webapp_name: sample-unit-testing-dotnet-mdsr5555-dev-weu
+          - region: secondary
+            webapp_name: sample-unit-testing-dotnet-mdsr5555-dev-cus
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Resolve source commit and artifact
+        id: resolve
+        uses: actions/github-script@v7
         with:
-          dotnet-version: '8.0.x'
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
-      - name: Restore dependencies
-        run: dotnet restore
+            const headSha =
+              context.eventName === "workflow_dispatch"
+                ? (core.getInput("commit_sha") || context.sha)
+                : context.payload.workflow_run.head_sha;
 
-      - name: Build
-        run: dotnet build --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+            const workflowId = "ci.yml";
 
-      - name: Publish application
-        run: dotnet publish PrimeService.Api/PrimeService.Api.csproj --configuration Release --no-build --output ${{ env.PUBLISH_PATH }}
+            const runsResponse = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: workflowId,
+              per_page: 100
+            });
+
+            const ciRun = runsResponse.data.workflow_runs.find(run =>
+              run.head_sha === headSha &&
+              run.conclusion === "success"
+            );
+
+            if (!ciRun) {
+              core.setFailed(`No successful CI run found for commit ${headSha}`);
+              return;
+            }
+
+            const artifactName = `app-build-${headSha}`;
+
+            const artifactsResponse = await github.rest.actions.listWorkflowRunArtifacts({
+              owner,
+              repo,
+              run_id: ciRun.id,
+              per_page: 100
+            });
+
+            const artifact = artifactsResponse.data.artifacts.find(a => a.name === artifactName);
+
+            if (!artifact) {
+              core.setFailed(`Artifact '${artifactName}' not found on CI run ${ciRun.id}`);
+              return;
+            }
+
+            core.setOutput("artifact_id", artifact.id.toString());
+            core.setOutput("artifact_name", artifactName);
+            core.setOutput("head_sha", headSha);
+
+      - name: Download deployment artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${{ steps.resolve.outputs.artifact_id }}/zip" \
+            -o artifact.zip
+
+          unzip -q artifact.zip -d artifact-download
+
+          PACKAGE_PATH=$(find artifact-download -type f -name "*.zip" | head -n 1)
+          if [ -z "$PACKAGE_PATH" ]; then
+            echo "No deployable zip found in downloaded artifact"
+            exit 1
+          fi
+
+          echo "PACKAGE_PATH=$PACKAGE_PATH" >> $GITHUB_ENV
 
       - name: Azure Login
         uses: azure/login@v2
@@ -45,5 +116,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.WEBAPP_NAME }}
-          package: ${{ env.PUBLISH_PATH }}
+          app-name: ${{ matrix.webapp_name }}
+          package: ${{ env.PACKAGE_PATH }}
