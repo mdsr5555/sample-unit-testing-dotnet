@@ -162,7 +162,7 @@ module "webapp" {
 module "vwan" {
   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-wan?ref=v1.2.0"
 
-  name                = "vwan-main"
+  name                = "vwan-${var.environment}"
   location            = module.rg.location
   resource_group_name = module.rg.name
   tags                = var.tags
@@ -171,7 +171,7 @@ module "vwan" {
 module "hub" {
   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-hub?ref=v1.2.0"
 
-  name                = "vhub-main"
+  name                = "vhub-${var.environment}"
   location            = module.rg.location
   resource_group_name = module.rg.name
   virtual_wan_id      = module.vwan.id
