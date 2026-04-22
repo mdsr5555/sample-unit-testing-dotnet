@@ -115,7 +115,7 @@ module "application_gateway_subnet" {
 module "application_gateway" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.6.0"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.6.1"
 
   name                     = local.region_names[each.key].agw_name
   public_ip_name           = local.region_names[each.key].pip_name
@@ -133,6 +133,7 @@ module "application_gateway" {
   capacity = 1
 
   waf_enabled                  = true
+  waf_policy_name              = "wafp-${var.project_name}-${var.environment}-${each.value.short}"
   waf_firewall_mode            = "Detection"
   waf_rule_set_type            = "OWASP"
   waf_rule_set_version         = "3.2"
