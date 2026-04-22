@@ -1,77 +1,128 @@
 module "rg" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/resource-group?ref=v1.5.8"
+  for_each = var.regions
 
-  name     = local.resource_group_name
-  location = var.location
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/resource-group?ref=v1.6.0"
+
+  name     = local.region_names[each.key].rg_name
+  location = each.value.location
   tags     = var.tags
 }
 
 module "vnets" {
-  for_each = var.vnets
+  for_each = local.flattened_vnets
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-network?ref=v1.5.8"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-network?ref=v1.6.0"
 
-  name                = "${each.key}-${var.environment}"
-  location            = module.rg.location
-  resource_group_name = module.rg.name
+  name                = each.value.name
+  location            = each.value.location
+  resource_group_name = module.rg[each.value.region_key].name
   address_space       = each.value.address_space
   dns_servers         = each.value.dns_servers
   tags                = var.tags
 }
 
 resource "azurerm_log_analytics_workspace" "this" {
-  name                = local.log_analytics_workspace_name
-  location            = module.rg.location
-  resource_group_name = module.rg.name
+  for_each = var.regions
+
+  name                = local.region_names[each.key].law_name
+  location            = module.rg[each.key].location
+  resource_group_name = module.rg[each.key].name
   sku                 = "PerGB2018"
   retention_in_days   = 30
   tags                = var.tags
 }
 
 resource "azurerm_application_insights" "this" {
-  name                = local.application_insights_name
-  location            = module.rg.location
-  resource_group_name = module.rg.name
-  workspace_id        = azurerm_log_analytics_workspace.this.id
+  for_each = var.regions
+
+  name                = local.region_names[each.key].appi_name
+  location            = module.rg[each.key].location
+  resource_group_name = module.rg[each.key].name
+  workspace_id        = azurerm_log_analytics_workspace.this[each.key].id
   application_type    = "web"
   tags                = var.tags
 }
 
-# module "frontdoor" {
-#   source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/frontdoor?ref=v1.5.1"
+module "plan" {
+  for_each = var.regions
 
-#   name                = "afd-sample-dev"
-#   resource_group_name = module.rg.name
-#   tags                = var.tags
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/app-service-plan?ref=v1.6.0"
 
-#   endpoint_name     = "afd-endpoint-sample-dev"
-#   origin_group_name = "og-app"
-#   origin_name       = "origin-app"
-#   route_name        = "route-app"
+  app_service_plan_name = local.region_names[each.key].asp_name
+  location              = module.rg[each.key].location
+  resource_group_name   = module.rg[each.key].name
+  os_type               = "Linux"
+  sku_name              = "B1"
+  tags                  = var.tags
+}
 
-#   origin_host_name = module.webapp.default_hostname
-# }
+module "app_service_integration_subnet" {
+  for_each = var.regions
+
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.6.0"
+
+  name                 = each.value.app_service_integration_subnet.subnet_name
+  resource_group_name  = module.rg[each.key].name
+  virtual_network_name = module.vnets["${each.key}-${each.value.app_service_integration_subnet.vnet_key}"].name
+  address_prefixes     = each.value.app_service_integration_subnet.address_prefixes
+
+  private_endpoint_network_policies = "Disabled"
+
+  delegation_name         = "appsvc-delegation"
+  service_delegation_name = "Microsoft.Web/serverFarms"
+  service_delegation_actions = [
+    "Microsoft.Network/virtualNetworks/subnets/action"
+  ]
+}
+
+module "webapp" {
+  for_each = var.regions
+
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-web-app?ref=v1.6.0"
+
+  web_app_name              = local.region_names[each.key].web_name
+  location                  = module.rg[each.key].location
+  resource_group_name       = module.rg[each.key].name
+  app_service_plan_id       = module.plan[each.key].id
+  https_only                = true
+  always_on                 = false
+  dotnet_version            = "8.0"
+  virtual_network_subnet_id = module.app_service_integration_subnet[each.key].id
+
+  app_settings = {
+    ASPNETCORE_ENVIRONMENT                     = var.environment
+    APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this[each.key].connection_string
+    ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
+    StorageConnectionString                    = module.storage[each.key].primary_connection_string
+  }
+
+  tags = var.tags
+}
 
 module "application_gateway_subnet" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.8"
+  for_each = var.regions
 
-  name                 = var.application_gateway_subnet.subnet_name
-  resource_group_name  = module.rg.name
-  virtual_network_name = module.vnets[var.application_gateway_subnet.vnet_key].name
-  address_prefixes     = var.application_gateway_subnet.address_prefixes
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.6.0"
+
+  name                 = each.value.application_gateway_subnet.subnet_name
+  resource_group_name  = module.rg[each.key].name
+  virtual_network_name = module.vnets["${each.key}-${each.value.application_gateway_subnet.vnet_key}"].name
+  address_prefixes     = each.value.application_gateway_subnet.address_prefixes
 
   private_endpoint_network_policies = "Disabled"
 }
 
 module "application_gateway" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.5.8"
+  for_each = var.regions
 
-  name                     = var.application_gateway_name
-  public_ip_name           = var.application_gateway_public_ip_name
-  resource_group_name      = module.rg.name
-  location                 = module.rg.location
-  subnet_id                = module.application_gateway_subnet.id
-  backend_fqdn             = module.webapp.default_hostname
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=v1.6.0"
+
+  name                     = local.region_names[each.key].agw_name
+  public_ip_name           = local.region_names[each.key].pip_name
+  resource_group_name      = module.rg[each.key].name
+  location                 = module.rg[each.key].location
+  subnet_id                = module.application_gateway_subnet[each.key].id
+  backend_fqdn             = module.webapp[each.key].default_hostname
   health_probe_path        = "/health"
   ssl_certificate_name     = var.application_gateway_ssl_certificate_name
   ssl_certificate_data     = var.application_gateway_ssl_certificate_data
@@ -92,16 +143,17 @@ module "application_gateway" {
 }
 
 module "application_gateway_diagnostics" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/diagnostic-setting?ref=v1.5.8"
+  for_each = var.regions
 
-  name                       = "diag-application-gateway"
-  target_resource_id         = module.application_gateway.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/diagnostic-setting?ref=v1.6.0"
+
+  name                       = "diag-application-gateway-${each.key}"
+  target_resource_id         = module.application_gateway[each.key].id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.this[each.key].id
 
   log_categories = [
     "ApplicationGatewayAccessLog",
-    "ApplicationGatewayFirewallLog",
-    "ApplicationGatewayPerformanceLog"
+    "ApplicationGatewayFirewallLog"
   ]
 
   metric_categories = [
@@ -109,126 +161,14 @@ module "application_gateway_diagnostics" {
   ]
 }
 
-module "plan" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/app-service-plan?ref=v1.5.8"
-
-  app_service_plan_name = local.app_service_plan_name
-  location              = module.rg.location
-  resource_group_name   = module.rg.name
-  os_type               = "Linux"
-  sku_name              = "B1"
-  tags                  = var.tags
-}
-
-module "app_service_integration_subnet" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.8"
-
-  name                 = var.app_service_integration_subnet.subnet_name
-  resource_group_name  = module.rg.name
-  virtual_network_name = module.vnets[var.app_service_integration_subnet.vnet_key].name
-  address_prefixes     = var.app_service_integration_subnet.address_prefixes
-
-  private_endpoint_network_policies = "Disabled"
-
-  delegation_name         = "appsvc-delegation"
-  service_delegation_name = "Microsoft.Web/serverFarms"
-  service_delegation_actions = [
-    "Microsoft.Network/virtualNetworks/subnets/action"
-  ]
-}
-
-module "webapp" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-web-app?ref=v1.5.8"
-
-  web_app_name              = local.web_app_name
-  location                  = module.rg.location
-  resource_group_name       = module.rg.name
-  app_service_plan_id       = module.plan.id
-  https_only                = true
-  always_on                 = false
-  dotnet_version            = "8.0"
-  virtual_network_subnet_id = module.app_service_integration_subnet.id
-
-  app_settings = {
-    ASPNETCORE_ENVIRONMENT                     = var.environment
-    APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this.connection_string
-    ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
-    StorageConnectionString                    = module.storage.primary_connection_string
-  }
-
-  tags = var.tags
-}
-
-module "vwan" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-wan?ref=v1.2.0"
-
-  name                = "vwan-${var.environment}"
-  location            = module.rg.location
-  resource_group_name = module.rg.name
-  tags                = var.tags
-}
-
-module "hub" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-hub?ref=v1.2.0"
-
-  name                = "vhub-${var.environment}"
-  location            = module.rg.location
-  resource_group_name = module.rg.name
-  virtual_wan_id      = module.vwan.id
-
-  address_prefix = "10.100.0.0/24" # hub network
-  tags           = var.tags
-}
-
-module "vnet_connections" {
-  for_each = module.vnets
-
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/vnet-connection?ref=v1.2.0"
-
-  name           = "conn-${each.key}"
-  virtual_hub_id = module.hub.id
-  vnet_id        = each.value.id
-}
-
-module "private_dns_zone_blob" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=v1.3.0"
-
-  name                = "privatelink.blob.core.windows.net"
-  resource_group_name = module.rg.name
-
-  virtual_network_links = {
-    vnet01-link = {
-      virtual_network_id   = module.vnets["vnet01"].id
-      registration_enabled = false
-    }
-    vnet02-link = {
-      virtual_network_id   = module.vnets["vnet02"].id
-      registration_enabled = false
-    }
-  }
-
-  tags = var.tags
-}
-
-module "private_endpoint_subnets" {
-  for_each = var.private_endpoint_subnets
-
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.5.9"
-
-  name                 = each.value.subnet_name
-  resource_group_name  = module.rg.name
-  virtual_network_name = module.vnets[each.value.vnet_key].name
-  address_prefixes     = each.value.address_prefixes
-
-  private_endpoint_network_policies = "Disabled"
-}
-
 module "storage" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/storage-account?ref=v1.5.9"
+  for_each = var.regions
 
-  name                          = local.storage_account_name
-  resource_group_name           = module.rg.name
-  location                      = module.rg.location
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/storage-account?ref=v1.6.0"
+
+  name                          = local.region_names[each.key].storage_name
+  resource_group_name           = module.rg[each.key].name
+  location                      = module.rg[each.key].location
   account_tier                  = "Standard"
   account_replication_type      = "LRS"
   account_kind                  = "StorageV2"
@@ -238,17 +178,110 @@ module "storage" {
   tags = var.tags
 }
 
-module "storage_private_endpoint" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.5.9"
+module "private_endpoint_subnet" {
+  for_each = var.regions
 
-  name                            = "pe-${local.storage_account_name}-blob"
-  location                        = module.rg.location
-  resource_group_name             = module.rg.name
-  subnet_id                       = module.private_endpoint_subnets["pe-subnet-vnet01"].id
-  private_service_connection_name = "psc-${local.storage_account_name}-blob"
-  private_connection_resource_id  = module.storage.id
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=v1.6.0"
+
+  name                 = each.value.private_endpoint_subnet.subnet_name
+  resource_group_name  = module.rg[each.key].name
+  virtual_network_name = module.vnets["${each.key}-${each.value.private_endpoint_subnet.vnet_key}"].name
+  address_prefixes     = each.value.private_endpoint_subnet.address_prefixes
+
+  private_endpoint_network_policies = "Disabled"
+}
+
+module "private_dns_zone_blob" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=v1.6.0"
+
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = module.rg["primary"].name
+
+  virtual_network_links = {
+    for link_key, link in local.private_dns_links :
+    link_key => {
+      virtual_network_id   = module.vnets[link.virtual_network_key].id
+      registration_enabled = link.registration_enabled
+    }
+  }
+
+  tags = var.tags
+}
+
+module "storage_private_endpoint" {
+  for_each = var.regions
+
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=v1.6.0"
+
+  name                            = "pe-${local.region_names[each.key].storage_name}-blob"
+  location                        = module.rg[each.key].location
+  resource_group_name             = module.rg[each.key].name
+  subnet_id                       = module.private_endpoint_subnet[each.key].id
+  private_service_connection_name = "psc-${local.region_names[each.key].storage_name}-blob"
+  private_connection_resource_id  = module.storage[each.key].id
   subresource_names               = ["blob"]
   private_dns_zone_group_name     = "default"
   private_dns_zone_ids            = [module.private_dns_zone_blob.id]
   tags                            = var.tags
+}
+
+module "vwan" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-wan?ref=v1.6.0"
+
+  name                = "vwan-${var.environment}"
+  location            = module.rg["primary"].location
+  resource_group_name = module.rg["primary"].name
+  tags                = var.tags
+}
+
+module "hub" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-hub?ref=v1.6.0"
+
+  name                = "vhub-${var.environment}"
+  location            = module.rg["primary"].location
+  resource_group_name = module.rg["primary"].name
+  virtual_wan_id      = module.vwan.id
+
+  address_prefix = "10.100.0.0/24"
+  tags           = var.tags
+}
+
+module "vnet_connections" {
+  for_each = module.vnets
+
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/vnet-connection?ref=v1.6.0"
+
+  name           = "conn-${each.key}"
+  virtual_hub_id = module.hub.id
+  vnet_id        = each.value.id
+}
+
+module "traffic_manager" {
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/traffic-manager?ref=v1.6.0"
+
+  name                = "tm-${var.project_name}-${var.environment}"
+  resource_group_name = module.rg["primary"].name
+
+  traffic_routing_method = "Priority"
+  relative_name          = "tm-${var.project_name}-${var.environment}"
+  ttl                    = 30
+
+  monitor_protocol = "HTTPS"
+  monitor_port     = 443
+  monitor_path     = "/health"
+
+  endpoints = {
+    primary = {
+      target            = module.application_gateway["primary"].public_ip_address
+      endpoint_location = var.regions["primary"].location
+      priority          = var.regions["primary"].priority
+    }
+    secondary = {
+      target            = module.application_gateway["secondary"].public_ip_address
+      endpoint_location = var.regions["secondary"].location
+      priority          = var.regions["secondary"].priority
+    }
+  }
+
+  tags = var.tags
 }

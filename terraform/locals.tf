@@ -1,18 +1,40 @@
 locals {
-  name_suffix = "${var.project_name}-${var.environment}"
+  region_names = {
+    for region_key, region in var.regions :
+    region_key => {
+      rg_name   = "rg-${var.project_name}-${var.environment}-${region.short}"
+      law_name  = "law-${var.project_name}-${var.environment}-${region.short}"
+      appi_name = "appi-${var.project_name}-${var.environment}-${region.short}"
+      asp_name  = "asp-${var.project_name}-${var.environment}-${region.short}"
+      web_name  = "${var.project_name}-${var.unique_suffix}-${var.environment}-${region.short}"
+      agw_name  = "agw-${var.project_name}-${var.environment}-${region.short}"
+      pip_name  = "pip-agw-${var.project_name}-${var.environment}-${region.short}"
+      storage_name = substr(
+        lower(replace("st${var.project_name}${var.environment}${region.short}${var.unique_suffix}", "-", "")),
+        0,
+        24
+      )
+    }
+  }
 
-  resource_group_name          = "rg-${local.name_suffix}"
-  app_service_plan_name        = "asp-${local.name_suffix}"
-  web_app_name                 = "${var.project_name}-${var.unique_suffix}-${var.environment}"
-  log_analytics_workspace_name = "law-${local.name_suffix}"
-  application_insights_name    = "appi-${local.name_suffix}"
+  flattened_vnets = merge([
+    for region_key, region in var.regions : {
+      for vnet_key, vnet in region.vnets :
+      "${region_key}-${vnet_key}" => {
+        region_key    = region_key
+        location      = region.location
+        name          = "${vnet_key}-${var.environment}-${region.short}"
+        address_space = vnet.address_space
+        dns_servers   = try(vnet.dns_servers, [])
+      }
+    }
+  ]...)
 
-  application_gateway_name      = var.application_gateway_name
-  application_gateway_public_ip = var.application_gateway_public_ip_name
-
-  storage_account_name = lower(substr(
-    replace("st${var.project_name}${var.environment}${var.unique_suffix}", "-", ""),
-    0,
-    24
-  ))
+  private_dns_links = {
+    for region_key, region in var.regions :
+    "${region_key}-link" => {
+      virtual_network_key  = "${region_key}-${region.private_endpoint_subnet.vnet_key}"
+      registration_enabled = false
+    }
+  }
 }
