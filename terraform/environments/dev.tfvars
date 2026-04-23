@@ -22,12 +22,6 @@ regions = {
       vnet02 = {
         address_space = ["10.10.1.0/24"]
       }
-      vnet03 = {
-        address_space = ["10.10.2.0/24"]
-      }
-      vnet04 = {
-        address_space = ["10.10.3.0/24"]
-      }
     }
 
     app_service_integration_subnet = {

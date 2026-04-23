@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-test-package:
+  build:
     runs-on: ubuntu-latest
 
     env:
