@@ -8,8 +8,8 @@ on:
     branches:
       - main
   workflow_dispatch:
-  schedule:
-    - cron: "0 8 * * *" # 9 AM UK during BST
+  # schedule:
+  #   - cron: "0 8 * * *" # 9 AM UK during BST
 
 permissions:
   contents: read
