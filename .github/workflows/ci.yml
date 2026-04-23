@@ -9,7 +9,7 @@ on:
       - main
   workflow_dispatch:
   # schedule:
-  #   - cron: "0 8 * * *" # 9 AM UK during BST
+  #   - cron: "0 8 * * *" # 9 AM UK during BST time
 
 permissions:
   contents: read
