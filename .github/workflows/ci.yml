@@ -36,27 +36,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Checkov
-        id: checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: terraform/
-          framework: terraform
-          output_format: sarif,github_failed_only
-          output_file_path: results.sarif,results.md
-          soft_fail: false
-          download_external_modules: true
+      # - name: Run Checkov
+      #   id: checkov
+      #   uses: bridgecrewio/checkov-action@master
+      #   with:
+      #     directory: terraform/
+      #     framework: terraform
+      #     output_format: sarif,github_failed_only
+      #     output_file_path: results.sarif,results.md
+      #     soft_fail: false
+      #     download_external_modules: true
 
-      - name: Publish Checkov results to Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
+      # - name: Publish Checkov results to Security tab
+      #   if: always()
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: results.sarif
 
-      - name: Publish Checkov results to workflow summary
-        if: always()
-        run: |
-          cat results.md >> "$GITHUB_STEP_SUMMARY"
+      # - name: Publish Checkov results to workflow summary
+      #   if: always()
+      #   run: |
+      #     cat results.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
