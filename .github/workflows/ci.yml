@@ -45,6 +45,7 @@ jobs:
           output_format: sarif,github_failed_only
           output_file_path: results.sarif,results.md
           soft_fail: false
+          download_external_modules: true
 
       - name: Publish Checkov results to Security tab
         if: always()
