@@ -5,13 +5,15 @@ on:
     workflows: ["CI Pipeline"]
     types:
       - completed
+  workflow_dispatch:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   terraform:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     env:
       TF_VAR_application_gateway_ssl_certificate_data: ${{ secrets.APPGW_CERT_DATA }}
@@ -35,6 +37,9 @@ jobs:
       - name: Terraform Format Check
         run: terraform fmt -check
 
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
       - name: Run Checkov
         id: checkov
         uses: bridgecrewio/checkov-action@master
@@ -55,10 +60,7 @@ jobs:
       - name: Publish Checkov results to workflow summary
         if: always()
         run: |
-          cat results.md >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Terraform Init
-        run: terraform init
+          cat ../results.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Terraform Validate
         run: terraform validate
