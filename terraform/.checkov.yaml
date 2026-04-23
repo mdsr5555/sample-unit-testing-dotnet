@@ -1,16 +1,31 @@
 skip-check:
-  - CKV_AZURE_225 # Zone redundancy deferred; dev environment uses regional DR instead
-  - CKV_AZURE_211 # Dev environment uses lower App Service Plan SKU for cost control
-  - CKV_AZURE_17  # Incoming client certificates are not required for the current auth model
-  - CKV_AZURE_16  # Azure AD registration is deferred until final auth design is implemented
-  - CKV_AZURE_13  # App Service authentication is deferred until final auth design is implemented
-  - CKV_AZURE_88  # Azure Files is not required for the current Linux web app design
-  - CKV_AZURE_183 # Custom local DNS servers are not used in the current Azure-native design
-  - CKV_AZURE_217 # HTTP listener is retained only to redirect traffic to HTTPS
-  - CKV_AZURE_33  # Queue logging is not applicable unless Azure Queue service is used
-  - CKV_AZURE_206 # Higher replication tier is deferred for dev due to cost
-  - CKV2_AZURE_41 # SAS expiration policy is not applicable because SAS is not currently used
-  - CKV2_AZURE_1  # Customer-managed keys are deferred; platform-managed encryption is currently used
-  - CKV2_AZURE_33 # Private endpoint exists via separate module pattern not inferred by scanner
-  - CKV_AZURE_222 # App Service public access remains enabled until private ingress pattern is completed
-  - CKV_AZURE_135 # Additional custom WAF hardening for Log4Shell is deferred; managed WAF policy is enabled
+  - CKV_AZURE_225
+  - CKV_AZURE_211
+  - CKV_AZURE_17
+  - CKV_AZURE_16
+  - CKV_AZURE_13
+  - CKV_AZURE_88
+  - CKV_AZURE_183
+  - CKV_AZURE_217
+  - CKV_AZURE_33
+  - CKV_AZURE_206
+  - CKV2_AZURE_41
+  - CKV2_AZURE_1
+  - CKV2_AZURE_33
+  - CKV_AZURE_222
+  - CKV_AZURE_135
+#   - CKV_AZURE_225 # Zone redundancy deferred; dev environment uses regional DR instead
+#   - CKV_AZURE_211 # Dev environment uses lower App Service Plan SKU for cost control
+#   - CKV_AZURE_17  # Incoming client certificates are not required for the current auth model
+#   - CKV_AZURE_16  # Azure AD registration is deferred until final auth design is implemented
+#   - CKV_AZURE_13  # App Service authentication is deferred until final auth design is implemented
+#   - CKV_AZURE_88  # Azure Files is not required for the current Linux web app design
+#   - CKV_AZURE_183 # Custom local DNS servers are not used in the current Azure-native design
+#   - CKV_AZURE_217 # HTTP listener is retained only to redirect traffic to HTTPS
+#   - CKV_AZURE_33  # Queue logging is not applicable unless Azure Queue service is used
+#   - CKV_AZURE_206 # Higher replication tier is deferred for dev due to cost
+#   - CKV2_AZURE_41 # SAS expiration policy is not applicable because SAS is not currently used
+#   - CKV2_AZURE_1  # Customer-managed keys are deferred; platform-managed encryption is currently used
+#   - CKV2_AZURE_33 # Private endpoint exists via separate module pattern not inferred by scanner
+#   - CKV_AZURE_222 # App Service public access remains enabled until private ingress pattern is completed
+#   - CKV_AZURE_135 # Additional custom WAF hardening for Log4Shell is deferred; managed WAF policy is enabled
