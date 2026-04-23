@@ -5,7 +5,11 @@ var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
 app.MapGet("/", () => "Hello from Azure");
-app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+app.MapGet("/health", () =>
+{
+    var region = Environment.GetEnvironmentVariable("REGION") ?? "unknown";
+    return Results.Ok($"Healthy from {region}");
+});
 
 app.MapGet("/storage-test", async (IConfiguration config) =>
 {

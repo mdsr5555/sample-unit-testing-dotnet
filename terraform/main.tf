@@ -94,6 +94,7 @@ module "webapp" {
     APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.this[each.key].connection_string
     ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
     StorageConnectionString                    = module.storage[each.key].primary_connection_string
+    REGION                                     = each.value.location
   }
 
   tags = var.tags
