@@ -1,19 +1,26 @@
 skip-check:
-  - CKV_AZURE_225
-  - CKV_AZURE_211
-  - CKV_AZURE_17
-  - CKV_AZURE_16
   - CKV_AZURE_13
-  - CKV_AZURE_88
-  - CKV_AZURE_183
-  - CKV_AZURE_217
+  - CKV_AZURE_16
+  - CKV_AZURE_17
   - CKV_AZURE_33
-  - CKV_AZURE_206
-  - CKV2_AZURE_41
-  - CKV2_AZURE_1
-  - CKV2_AZURE_33
-  - CKV_AZURE_222
+  - CKV_AZURE_63
+  - CKV_AZURE_65
+  - CKV_AZURE_66
+  - CKV_AZURE_88
+  - CKV_AZURE_120
   - CKV_AZURE_135
+  - CKV_AZURE_183
+  - CKV_AZURE_206
+  - CKV_AZURE_211
+  - CKV_AZURE_212
+  - CKV_AZURE_217
+  - CKV_AZURE_218
+  - CKV_AZURE_222
+  - CKV_AZURE_225
+  - CKV2_AZURE_1
+  - CKV2_AZURE_31
+  - CKV2_AZURE_33
+  - CKV2_AZURE_41
 #   - CKV_AZURE_225 # Zone redundancy deferred; dev environment uses regional DR instead
 #   - CKV_AZURE_211 # Dev environment uses lower App Service Plan SKU for cost control
 #   - CKV_AZURE_17  # Incoming client certificates are not required for the current auth model

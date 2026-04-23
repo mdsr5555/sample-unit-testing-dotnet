@@ -85,7 +85,7 @@ module "webapp" {
   resource_group_name       = module.rg[each.key].name
   app_service_plan_id       = module.plan[each.key].id
   https_only                = true
-  always_on                 = false
+  always_on                 = true
   dotnet_version            = "8.0"
   virtual_network_subnet_id = module.app_service_integration_subnet[each.key].id
 
