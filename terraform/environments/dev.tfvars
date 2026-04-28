@@ -2,9 +2,6 @@ project_name  = "sample-unit-testing-dotnet"
 environment   = "dev"
 unique_suffix = "mdsr5555"
 
-# This is the "Pause" switch
-// enable_secondary_region = false
-
 tags = {
   environment = "dev"
   managed_by  = "terraform"

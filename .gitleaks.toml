@@ -1,0 +1,8 @@
+[allowlist]
+description = "Allow specific files or paths"
+paths = [
+    '''terraform/appgw.crt''', # Examples of files to ignore if they trigger false positives
+    '''terraform/appgw_base64.txt'''
+]
+
+# You can also ignore specific secret patterns or global gitignore rules

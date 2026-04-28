@@ -34,6 +34,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # IMPORTANT: Gitleaks needs full history to scan properly
+
+      - name: Run Gitleaks
+        id: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-path: .gitleaks.toml # We will create this next
+          # fail: true (Default behavior: fails the job if secrets found)
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4

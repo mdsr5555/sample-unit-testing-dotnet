@@ -80,6 +80,12 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 **/Properties/launchSettings.json
+bin/
+obj/
+TestResults/
+publish/
+*.trx
+
 
 # VS Code
 .vscode/
@@ -340,5 +346,27 @@ About
 .terraform/
 *.tfstate
 *.tfstate.*
-crash.log
 *.tfplan
+crash.log
+crash.*.log
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# Secrets / certificates / keys
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+appgw_base64.txt
+privatekey.pem
+
+
+# Packages
+app-build-*.zip
+artifact.zip
+artifact-download/
