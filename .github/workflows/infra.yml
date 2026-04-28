@@ -76,4 +76,4 @@ jobs:
           path: terraform/tfplan
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -parallelism=1 -auto-approve tfplan
