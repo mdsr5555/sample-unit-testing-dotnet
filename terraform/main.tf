@@ -273,15 +273,11 @@ module "traffic_manager" {
   monitor_path     = "/health"
 
   endpoints = {
-    primary = {
-      target            = module.application_gateway["primary"].public_ip_address
-      endpoint_location = var.regions["primary"].location
-      priority          = var.regions["primary"].priority
-    }
-    secondary = {
-      target            = module.application_gateway["secondary"].public_ip_address
-      endpoint_location = var.regions["secondary"].location
-      priority          = var.regions["secondary"].priority
+    for region_key, region in var.regions :
+    region_key => {
+      target            = module.application_gateway[region_key].public_ip_address
+      endpoint_location = region.location
+      priority          = region.priority
     }
   }
 
