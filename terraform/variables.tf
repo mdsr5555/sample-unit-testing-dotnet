@@ -67,3 +67,9 @@ variable "application_gateway_ssl_certificate_password" {
   type        = string
   sensitive   = true
 }
+
+# variable "enable_secondary_region" {
+#   type        = bool
+#   description = "Toggle for secondary region deployment"
+#   default     = false # Set to false to pause it
+# }
