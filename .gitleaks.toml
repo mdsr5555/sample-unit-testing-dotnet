@@ -1,10 +1,13 @@
-title = "Gitleaks configuration"
+# Include the default Gitleaks rules
+# This ensures that even if you have an allowlist, the standard checks still run
+[extend]
+useDefault = true
 
 [allowlist]
-description = "Allow known lab certificate files only"
+description = "Allow specific files or paths"
 paths = [
-  '''terraform/appgw\.crt''',
-  '''terraform/appgw\.key''',
-  '''terraform/privkey\.pem''',
-  '''terraform/appgw_base64\.txt'''
+    '''terraform/appgw.crt''',
+    '''terraform/appgw.key''',
+    '''terraform/privkey.pem''',
+    '''terraform/appgw_base64.txt'''
 ]
