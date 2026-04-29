@@ -1,8 +1,10 @@
+title = "Gitleaks configuration"
+
 [allowlist]
-description = "Allow specific files or paths"
+description = "Allow known lab certificate files only"
 paths = [
-    '''terraform/appgw.crt''',
-    '''terraform/appgw.key''',
-    '''terraform/privkey.pem''',
-    '''terraform/appgw_base64.txt'''
+  '''terraform/appgw\.crt''',
+  '''terraform/appgw\.key''',
+  '''terraform/privkey\.pem''',
+  '''terraform/appgw_base64\.txt'''
 ]
