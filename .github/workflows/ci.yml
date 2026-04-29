@@ -37,7 +37,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # IMPORTANT: Gitleaks needs full history to scan properly
+          fetch-depth: 1 # IMPORTANT: Gitleaks needs full history to scan properly
 
       - name: Run Gitleaks
         run: bash scripts/run-gitleaks.sh

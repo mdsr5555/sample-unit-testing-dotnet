@@ -15,5 +15,4 @@ docker run --rm \
   --config /repo/.gitleaks.toml \
   --redact \
   --verbose \
-  --exit-code 1 \
-  --log-opts="--all"
+  --exit-code 1
