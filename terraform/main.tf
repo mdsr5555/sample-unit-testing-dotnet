@@ -61,6 +61,13 @@ module "key_vault" {
   soft_delete_retention_days    = 7
   public_network_access_enabled = false
 
+  network_acls = {
+    bypass                     = "AzureServices"
+    default_action             = "Deny"
+    ip_rules                   = []
+    virtual_network_subnet_ids = []
+  }
+
   tags = var.tags
 }
 
