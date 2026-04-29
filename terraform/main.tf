@@ -146,8 +146,8 @@ module "webapp" {
   always_on                 = true
   dotnet_version            = "8.0"
   virtual_network_subnet_id = module.app_service_integration_subnet[each.key].id
+  managed_identity_enabled  = true
 
-  identity_type = "SystemAssigned"
 
   app_settings = {
     ASPNETCORE_ENVIRONMENT                     = var.environment
