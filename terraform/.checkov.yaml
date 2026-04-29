@@ -2,8 +2,7 @@ skip-check:
   - CKV_AZURE_13
   - CKV_AZURE_16
   - CKV_AZURE_17
-  - id: CKV2_AZURE_32
-    comment: "Key Vault private endpoint is created in the root module using the shared private-endpoint module."
+  - CKV2_AZURE_32
   - CKV_AZURE_33
   - CKV_AZURE_63
   - CKV_AZURE_65
@@ -36,6 +35,7 @@ skip-check:
 #   - CKV_AZURE_206 # Higher replication tier is deferred for dev due to cost
 #   - CKV2_AZURE_41 # SAS expiration policy is not applicable because SAS is not currently used
 #   - CKV2_AZURE_1  # Customer-managed keys are deferred; platform-managed encryption is currently used
+#   - CKV2_AZURE_32 # Key Vault private endpoint is created in root module via shared private-endpoint module
 #   - CKV2_AZURE_33 # Private endpoint exists via separate module pattern not inferred by scanner
 #   - CKV_AZURE_222 # App Service public access remains enabled until private ingress pattern is completed
 #   - CKV_AZURE_135 # Additional custom WAF hardening for Log4Shell is deferred; managed WAF policy is enabled
