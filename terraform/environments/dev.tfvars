@@ -17,10 +17,10 @@ regions = {
 
     vnets = {
       vnet01 = {
-        address_space = ["10.10.0.0/24"]
+        address_space = ["10.10.0.0/23"]
       }
       vnet02 = {
-        address_space = ["10.10.1.0/24"]
+        address_space = ["10.10.2.0/24"]
       }
     }
 
@@ -39,7 +39,7 @@ regions = {
     application_gateway_subnet = {
       vnet_key         = "vnet01"
       subnet_name      = "snet-appgw"
-      address_prefixes = ["10.10.0.96/27"]
+      address_prefixes = ["10.10.1.0/24"]
     }
   }
 
