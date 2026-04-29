@@ -2,15 +2,16 @@
 
 set -euo pipefail
 
-# Simple script to:
-# 1. Fetch latest commit SHA from terraform-templates repo
-# 2. Update all terraform-templates module refs in terraform/main.tf
-
 REPO_API="https://api.github.com/repos/mdsr5555/terraform-templates/commits/main"
 TARGET_FILE="terraform/main.tf"
 
 echo "Fetching latest commit SHA from terraform-templates..."
-SHA=$(curl -s "$REPO_API" | python3 -c 'import sys, json; print(json.load(sys.stdin)["sha"])')
+
+SHA=$(
+  curl -fsSL "$REPO_API" |
+    sed -n 's/^[[:space:]]*"sha":[[:space:]]*"\([0-9a-f]\{40\}\)".*/\1/p' |
+    head -n 1
+)
 
 if [ -z "$SHA" ]; then
   echo "Failed to fetch latest commit SHA."
@@ -20,26 +21,13 @@ fi
 echo "Latest SHA: $SHA"
 echo "Updating module refs in $TARGET_FILE ..."
 
-python3 <<PY
-import re
-from pathlib import Path
+TMP_FILE="$(mktemp)"
 
-target = Path("$TARGET_FILE")
-sha = "$SHA"
+sed -E \
+  "s#git::https://github\.com/mdsr5555/terraform-templates\.git//modules/([^\"?]+)\?ref=[^\"]+#git::https://github.com/mdsr5555/terraform-templates.git//modules/\1?ref=${SHA}#g" \
+  "$TARGET_FILE" > "$TMP_FILE"
 
-text = target.read_text()
-
-pattern = re.compile(
-    r'git::https://github\.com/mdsr5555/terraform-templates\.git//modules/([^"?]+)\?ref=[^"]+'
-)
-
-updated = pattern.sub(
-    lambda m: f'git::https://github.com/mdsr5555/terraform-templates.git//modules/{m.group(1)}?ref={sha}',
-    text
-)
-
-target.write_text(updated)
-PY
+mv "$TMP_FILE" "$TARGET_FILE"
 
 echo "Done."
 echo "All terraform-templates module refs updated to:"
