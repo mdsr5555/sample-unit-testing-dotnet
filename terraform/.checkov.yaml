@@ -2,6 +2,8 @@ skip-check:
   - CKV_AZURE_13
   - CKV_AZURE_16
   - CKV_AZURE_17
+  - id: CKV2_AZURE_32
+    comment: "Key Vault private endpoint is created in the root module using the shared private-endpoint module."
   - CKV_AZURE_33
   - CKV_AZURE_63
   - CKV_AZURE_65
