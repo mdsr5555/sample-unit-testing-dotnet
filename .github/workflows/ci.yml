@@ -14,7 +14,7 @@ on:
 permissions:
   contents: read
   checks: write
-  # Required for Gitleaks to write reports/annotations
+  # Required for Gitleaks to write reports/annotationss
   security-events: write
 
 concurrency:
