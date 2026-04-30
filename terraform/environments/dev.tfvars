@@ -36,12 +36,16 @@ regions = {
       address_prefixes = ["10.10.0.64/27"]
     }
 
-
-
     application_gateway_subnet = {
       vnet_key         = "vnet01"
       subnet_name      = "snet-appgw"
       address_prefixes = ["10.10.3.0/24"]
+    }
+
+    jumpbox_subnet = {
+      vnet_key         = "vnet01"
+      subnet_name      = "snet-jumpbox"
+      address_prefixes = ["10.10.0.128/27"]
     }
   }
 
@@ -86,7 +90,7 @@ regions = {
 }
 
 jumpbox_allowed_ssh_cidrs = [
-  "YOUR_PUBLIC_IP/32"
+  "82.12.127.151/32"
 ]
 
 application_gateway_ssl_certificate_name = "appgw-cert"
