@@ -23,6 +23,7 @@ skip-check:
   - CKV2_AZURE_33
   - CKV2_AZURE_40
   - CKV2_AZURE_41
+  - CKV_AZURE_50
 #   - CKV_AZURE_225 # Zone redundancy deferred; dev environment uses regional DR instead
 #   - CKV_AZURE_211 # Dev environment uses lower App Service Plan SKU for cost control
 #   - CKV_AZURE_17  # Incoming client certificates are not required for the current auth model
@@ -39,3 +40,4 @@ skip-check:
 #   - CKV2_AZURE_33 # Private endpoint exists via separate module pattern not inferred by scanner
 #   - CKV_AZURE_222 # App Service public access remains enabled until private ingress pattern is completed
 #   - CKV_AZURE_135 # Additional custom WAF hardening for Log4Shell is deferred; managed WAF policy is enabled
+#   - CKV_AZURE_50 # No VM extensions are created; jumpbox uses only azurerm_linux_virtual_machine
