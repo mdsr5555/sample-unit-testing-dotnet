@@ -4,7 +4,7 @@ data "azurerm_client_config" "current" {}
 module "rg" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/resource-group?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/resource-group?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name     = local.region_names[each.key].rg_name
   location = each.value.location
@@ -14,7 +14,7 @@ module "rg" {
 module "vnets" {
   for_each = local.flattened_vnets
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-network?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-network?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                = each.value.name
   location            = each.value.location
@@ -49,7 +49,7 @@ resource "azurerm_application_insights" "this" {
 module "key_vault" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/key-vault?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/key-vault?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                          = local.region_names[each.key].kv_name
   location                      = module.rg[each.key].location
@@ -72,7 +72,7 @@ module "key_vault" {
 }
 
 module "private_dns_zone_key_vault" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                = "privatelink.vaultcore.azure.net"
   resource_group_name = module.rg["primary"].name
@@ -91,7 +91,7 @@ module "private_dns_zone_key_vault" {
 module "key_vault_private_endpoint" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                            = "pe-${module.key_vault[each.key].name}"
   location                        = module.rg[each.key].location
@@ -111,7 +111,7 @@ module "key_vault_private_endpoint" {
 module "plan" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/app-service-plan?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/app-service-plan?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   app_service_plan_name = local.region_names[each.key].asp_name
   location              = module.rg[each.key].location
@@ -124,7 +124,7 @@ module "plan" {
 module "app_service_integration_subnet" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                 = each.value.app_service_integration_subnet.subnet_name
   resource_group_name  = module.rg[each.key].name
@@ -143,7 +143,7 @@ module "app_service_integration_subnet" {
 module "webapp" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-web-app?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-web-app?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   web_app_name              = local.region_names[each.key].web_name
   location                  = module.rg[each.key].location
@@ -170,7 +170,7 @@ module "webapp" {
 module "webapp_key_vault_secrets_user" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/role-assignment?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/role-assignment?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   scope                = module.key_vault[each.key].id
   role_definition_name = "Key Vault Secrets User"
@@ -181,7 +181,7 @@ module "webapp_key_vault_secrets_user" {
 module "application_gateway_subnet" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                 = each.value.application_gateway_subnet.subnet_name
   resource_group_name  = module.rg[each.key].name
@@ -194,7 +194,7 @@ module "application_gateway_subnet" {
 module "application_gateway" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/application-gateway?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                     = local.region_names[each.key].agw_name
   public_ip_name           = local.region_names[each.key].pip_name
@@ -225,7 +225,7 @@ module "application_gateway" {
 module "application_gateway_identity" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/user-assigned-identity?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/user-assigned-identity?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                = local.region_names[each.key].uai_name
   location            = module.rg[each.key].location
@@ -236,7 +236,7 @@ module "application_gateway_identity" {
 module "application_gateway_key_vault_secrets_user" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/role-assignment?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/role-assignment?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   scope                = module.key_vault[each.key].id
   role_definition_name = "Key Vault Secrets User"
@@ -248,7 +248,7 @@ module "application_gateway_key_vault_secrets_user" {
 module "application_gateway_diagnostics" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/diagnostic-setting?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/diagnostic-setting?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                       = "diag-application-gateway-${each.key}"
   target_resource_id         = module.application_gateway[each.key].id
@@ -267,7 +267,7 @@ module "application_gateway_diagnostics" {
 module "storage" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/storage-account?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/storage-account?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                          = local.region_names[each.key].storage_name
   resource_group_name           = module.rg[each.key].name
@@ -284,7 +284,7 @@ module "storage" {
 module "private_endpoint_subnet" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                 = each.value.private_endpoint_subnet.subnet_name
   resource_group_name  = module.rg[each.key].name
@@ -297,7 +297,7 @@ module "private_endpoint_subnet" {
 module "jumpbox_subnet" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/subnet?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                 = each.value.jumpbox_subnet.subnet_name
   resource_group_name  = module.rg[each.key].name
@@ -308,12 +308,13 @@ module "jumpbox_subnet" {
 module "jumpbox_nsg" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/network-security-group?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/network-security-group?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                = local.region_names[each.key].jumpbox_nsg
   location            = module.rg[each.key].location
   resource_group_name = module.rg[each.key].name
   subnet_id           = module.jumpbox_subnet[each.key].id
+  associate_subnet    = true
 
   security_rules = [
     {
@@ -335,7 +336,7 @@ module "jumpbox_nsg" {
 module "jumpbox" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-virtual-machine?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/linux-virtual-machine?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                   = local.region_names[each.key].jumpbox_name
   location               = module.rg[each.key].location
@@ -356,7 +357,7 @@ module "jumpbox" {
 
 
 module "private_dns_zone_blob" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-dns-zone?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = module.rg["primary"].name
@@ -375,7 +376,7 @@ module "private_dns_zone_blob" {
 module "storage_private_endpoint" {
   for_each = var.regions
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/private-endpoint?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                            = "pe-${local.region_names[each.key].storage_name}-blob"
   location                        = module.rg[each.key].location
@@ -390,7 +391,7 @@ module "storage_private_endpoint" {
 }
 
 module "vwan" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-wan?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-wan?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                = "vwan-${var.environment}"
   location            = module.rg["primary"].location
@@ -399,7 +400,7 @@ module "vwan" {
 }
 
 module "hub" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-hub?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/virtual-hub?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                = "vhub-${var.environment}"
   location            = module.rg["primary"].location
@@ -413,7 +414,7 @@ module "hub" {
 module "vnet_connections" {
   for_each = module.vnets
 
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/vnet-connection?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/vnet-connection?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name           = "conn-${each.key}"
   virtual_hub_id = module.hub.id
@@ -421,7 +422,7 @@ module "vnet_connections" {
 }
 
 module "traffic_manager" {
-  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/traffic-manager?ref=6f39eea47242eb60db070da2a5ca06a63b3adec5"
+  source = "git::https://github.com/mdsr5555/terraform-templates.git//modules/traffic-manager?ref=f7d1f7ea08849259e95c01e8f7d09b97d93cfa21"
 
   name                = "tm-${var.project_name}-${var.environment}"
   resource_group_name = module.rg["primary"].name
