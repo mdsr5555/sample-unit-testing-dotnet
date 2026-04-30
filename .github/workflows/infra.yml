@@ -18,6 +18,7 @@ jobs:
     env:
       TF_VAR_application_gateway_ssl_certificate_data: ${{ secrets.APPGW_CERT_DATA }}
       TF_VAR_application_gateway_ssl_certificate_password: ${{ secrets.APPGW_CERT_PASSWORD }}
+      TF_VAR_jumpbox_admin_ssh_public_key: ${{ secrets.JUMPBOX_ADMIN_SSH_PUBLIC_KEY }}
     defaults:
       run:
         working-directory: terraform

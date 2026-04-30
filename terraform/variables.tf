@@ -48,6 +48,13 @@ variable "regions" {
       subnet_name      = string
       address_prefixes = list(string)
     })
+
+    jumpbox_subnet = object({
+      vnet_key         = string
+      subnet_name      = string
+      address_prefixes = list(string)
+    })
+
   }))
 }
 
@@ -66,6 +73,23 @@ variable "application_gateway_ssl_certificate_password" {
   description = "PFX certificate password"
   type        = string
   sensitive   = true
+}
+
+variable "jumpbox_admin_username" {
+  description = "Admin username for the jumpbox VM."
+  type        = string
+  default     = "azureuser"
+}
+
+variable "jumpbox_admin_ssh_public_key" {
+  description = "SSH public key used to access the jumpbox VM."
+  type        = string
+  sensitive   = true
+}
+
+variable "jumpbox_allowed_ssh_cidrs" {
+  description = "CIDR ranges allowed to SSH to the jumpbox public IP."
+  type        = list(string)
 }
 
 # variable "enable_secondary_region" {
