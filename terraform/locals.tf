@@ -12,7 +12,6 @@ locals {
       storage_name = substr(lower("st${region.short}${var.environment}${var.unique_suffix}"), 0, 24)
       kv_name      = substr(lower("kv-${var.project_name}-${var.environment}-${region.short}"), 0, 24)
       uai_name     = "uai-agw-${var.project_name}-${var.environment}-${region.short}"
-
     }
   }
 
