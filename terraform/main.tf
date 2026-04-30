@@ -341,7 +341,7 @@ module "jumpbox" {
   name                   = local.region_names[each.key].jumpbox_name
   location               = module.rg[each.key].location
   resource_group_name    = module.rg[each.key].name
-  size                   = "Standard_B2s"
+  size                   = "Standard_D2s_v5"
   admin_username         = var.jumpbox_admin_username
   admin_ssh_public_key   = var.jumpbox_admin_ssh_public_key
   subnet_id              = module.jumpbox_subnet[each.key].id
